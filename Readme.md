@@ -1,3 +1,47 @@
+# SmartKirana – Modern Loyalty Platform for Small Businesses
+
+## Problem Statement
+
+Small businesses in Tier-2/3 towns struggle to build customer loyalty because they lack simple, affordable tools to track repeat customers or maintain reward programs. Most existing solutions are either too complex or too expensive.
+
+## Solution
+
+SmartKirana is a simple and modern loyalty platform built using Flutter and Firebase. It helps small businesses:
+
+- Track repeat customers easily
+- Create digital reward programs
+- Manage customer points
+- Encourage repeat purchases
+- Strengthen long-term customer relationships
+
+The platform is designed to be lightweight, affordable, and easy to use for non-technical shop owners.
+
+## Key Features
+
+- Customer registration and login
+- Digital points-based reward system
+- Real-time data storage using Firebase
+- Simple and intuitive mobile interface
+- Secure authentication system
+
+## Target Users
+
+- Kirana stores
+- Local retail shops
+- Salons and small service businesses
+- Small cafes and food outlets in Tier-2/3 towns
+
+## Tech Stack
+
+- Flutter (Frontend)
+- Firebase Authentication
+- Cloud Firestore
+- Android Emulator for testing
+
+## Vision
+
+To empower small businesses with digital tools that help them compete with larger brands by building stronger customer relationships through a modern and accessible loyalty experience.
+
 # LoyaltyLite Firebase Integration
 
 This assignment demonstrates how Firebase solves backend challenges in a mobile app without managing custom servers.
