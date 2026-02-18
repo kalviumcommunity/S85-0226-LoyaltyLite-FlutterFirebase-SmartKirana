@@ -11,7 +11,7 @@ This project demonstrates:
 - Firebase initialization and platform setup using FlutterFire.
 - Optional Firebase Storage integration path for media uploads.
 
-## 1) Firebase Setup for Flutter
+## 1 Firebase Setup for Flutter
 
 ### Create and connect Firebase project
 
@@ -59,7 +59,7 @@ Future<void> main() async {
 }
 ```
 
-## 2) Key Firebase Services Used
+## 2 Key Firebase Services Used
 
 | Service                     | Purpose                      | In this app                                     |
 | --------------------------- | ---------------------------- | ----------------------------------------------- |
@@ -68,7 +68,7 @@ Future<void> main() async {
 | Firebase Storage (Optional) | Store media files            | Can be added for profile images/docs            |
 | Cloud Functions (Optional)  | Serverless backend logic     | Can be added for notifications/automations      |
 
-## 3) Authentication Implementation
+## 3 Authentication Implementation
 
 - Auth logic is handled in `lib/services/auth_service.dart`.
 - App state management for login flow is in `lib/providers/auth_provider.dart`.
@@ -86,7 +86,7 @@ UX feedback:
 - Error messages are shown when OTP send/verify fails.
 - Success SnackBars are shown when OTP is sent and login succeeds.
 
-## 4) Firestore Real-Time Sync
+## 4 Firestore Real-Time Sync
 
 Realtime sync is implemented with Firestore streams:
 
@@ -101,7 +101,7 @@ Why this is real-time:
 - When one user/device writes new customer or transaction data, all connected clients with the same query receive updates automatically.
 - No manual refresh is required in the dashboard customer list.
 
-## 5) Optional Firebase Storage Integration
+## 5 Optional Firebase Storage Integration
 
 If your app needs media uploads, add:
 
@@ -128,7 +128,7 @@ Future<void> uploadFile(File file) async {
 }
 ```
 
-## 6) Evidence / Documentation Checklist
+## 6 Evidence / Documentation Checklist
 
 Use this checklist for assignment submission:
 
