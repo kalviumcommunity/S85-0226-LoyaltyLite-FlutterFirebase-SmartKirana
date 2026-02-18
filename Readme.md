@@ -1,96 +1,149 @@
-# School Event Planner
+# LoyaltyLite Firebase Integration
 
-A Flutter app that demonstrates creative event planning using lateral thinking techniques. This project generates unique school event ideas by applying creative thinking methods like reversal, random association, and analogical thinking. Part of Sprint #2: Introduction to Flutter & Dart.
+This assignment demonstrates how Firebase solves backend challenges in a mobile app without managing custom servers.
 
----
+## Objective
 
-## 🗂 Folder Structure
+Learn how Firebase enables:
 
+- secure authentication,
+- real-time database synchronization,
+- scalable file storage,
+
+and how these services work together to deliver a smooth multi-device user experience.
+
+## Firebase Setup (Flutter)
+
+### 1) Create and connect Firebase project
+
+1. Open Firebase Console and create a project.
+2. Add Android and/or iOS apps.
+3. Download configuration files:
+   - `android/app/google-services.json`
+   - `ios/Runner/GoogleService-Info.plist`
+4. Run FlutterFire CLI in project root:
+
+```bash
+flutterfire configure
 ```
-lib/
-├── main.dart          # Entry point of the app
-├── screens/           # Individual UI screens (e.g. WelcomeScreen)
-├── widgets/           # Reusable UI components (buttons, cards)
-├── models/            # Data structures and domain classes
-├── services/          # Backend/API or Firebase logic (future use)
+
+5. Install dependencies:
+
+```bash
+flutter pub get
 ```
 
-- **Purpose of each directory**
-  - `lib/main.dart` contains `main()` and the root `MaterialApp`.
-  - `screens/` keeps each page’s widgets separate, enabling modular navigation.
-  - `widgets/` holds shared components so they can be reused across screens.
-  - `models/` helps keep data representations clean when state or API data is added.
-  - `services/` isolates networking or database logic from UI code.
+### 2) Dependencies used
 
-Naming conventions used throughout the project:
-- **Files:** `lower_snake_case.dart` (e.g. `welcome_screen.dart`).
-- **Classes/Widgets:** `UpperCamelCase` (e.g. `WelcomeScreen`).
-- **State classes:** underscored with leading `_` when private, matching their parent widget name.
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.0.0
+  cloud_firestore: ^5.0.0
+  firebase_storage: ^12.0.0
+```
 
-This structure supports modular app design by separating concerns; UI, data, and logic can be developed and tested independently.
+### 3) Firebase initialization
 
----
+Firebase is initialized in `lib/main.dart`:
 
-## ⚙️ Setup Instructions
+```dart
+Future<void> main() async {
+   WidgetsFlutterBinding.ensureInitialized();
+   await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+   );
+   runApp(const LoyaltyLiteFirebaseApp());
+}
+```
 
-1. **Install Flutter SDK**
-   - Follow the [official docs](https://docs.flutter.dev/get-started/install).
-   - Add `flutter/bin` to your `PATH`.
+## Key Firebase Services in This App
 
-2. **Install an IDE**
-   - Android Studio or VS Code with the Flutter & Dart extensions.
+| Service                    | Purpose                                  | Assignment implementation                  |
+| -------------------------- | ---------------------------------------- | ------------------------------------------ |
+| Firebase Authentication    | Secure sign-up/sign-in and session state | Email + password sign-up/sign-in, sign-out |
+| Cloud Firestore            | Real-time NoSQL data sync                | `tasks` collection with live task updates  |
+| Firebase Storage           | Upload and host files                    | Optional upload of sync evidence text file |
+| Cloud Functions (optional) | Serverless backend logic                 | Not required in this implementation        |
 
-3. **Verify installation**
-   ```bash
-   flutter doctor
-   ```
-   Fix any reported issues (e.g. Android licenses).
+## Implemented Features
 
-4. **Create the project** (if not already created via this repo):
-   ```bash
-   flutter create school_event_planner
-   ```
+### 1) Firebase Authentication
 
-5. **Run the app**
-   - Launch an emulator or connect a physical device.
-   - In the project root:
-     ```bash
-     flutter run
-     ```
+- Sign up and sign in with email/password.
+- Auth state listener automatically moves user between login and task screens.
+- Success/error messages shown using SnackBars.
 
----
+Files:
 
-## 🎯 Demo
+- `lib/services/auth_service.dart`
+- `lib/main.dart`
 
-![App Screenshot](assets/demo_screenshot.png)
+### 2) Firestore Real-Time Data
 
-> *Screenshot of the app running on an emulator. Replace the placeholder with your actual screenshot.*
+- Add new tasks to Firestore with server timestamps.
+- Read tasks using `snapshots()` for live updates.
+- UI updates automatically via `StreamBuilder` (no manual refresh).
+- Debug logs added to prove live sync events in console.
 
----
+Files:
 
-## 💭 Reflection
+- `lib/services/firestore_service.dart`
+- `lib/main.dart`
 
-This project introduced me to Flutter's widget system and state management while exploring lateral thinking techniques for creative problem-solving. Building the event idea generator taught me how `StatefulWidget` and `setState` enable dynamic UI interactions that can inspire creativity.
+### 3) Optional Firebase Storage
 
-The app demonstrates three lateral thinking techniques:
-- **Reversal Thinking**: Flipping normal concepts upside down (Reverse Day Festival)
-- **Random Association**: Combining unrelated concepts (Silent Disco Library)
-- **Analogical Thinking**: Applying patterns from one domain to another (Problem-Solving Olympics)
+- Upload an optional text file as sync evidence.
+- Retrieve and show download URL after successful upload.
 
-The modular folder structure will be crucial as we expand the app to include more features like event scheduling, participant registration, and idea voting systems. Separating screens, widgets, models, and services allows for independent development and testing of each component.
+Files:
 
-This approach to event planning moves beyond traditional ideas by systematically applying creative thinking techniques, resulting in more engaging and memorable school experiences.
+- `lib/services/storage_service.dart`
+- `lib/main.dart`
 
----
+## Why Firestore Sync Is Real-Time
 
-## 📎 Links
+The app uses Firestore live query streams:
 
-- Video demo: _[link to Loom/YouTube/Drive]_ (include when available)
+```dart
+FirebaseFirestore.instance
+   .collection('tasks')
+   .where('uid', isEqualTo: uid)
+   .orderBy('createdAt', descending: true)
+   .snapshots()
+```
 
----
+When one user/device writes data, all connected clients subscribed to the same query receive updates instantly. This removes polling and manual refresh logic.
 
-*Commit message example:* `feat: initialized Flutter project and basic UI setup`  
-*PR title example:* `[Sprint-2] Flutter & Dart Basics – TeamName`  
+## Run Instructions
 
-Feel free to personalize themes, icons, and text for your team’s app concept.
-Happy coding! 🚀
+```bash
+flutter pub get
+flutter run
+```
+
+## Evidence Checklist for Submission
+
+- [x] Firebase Auth flow implemented and working.
+- [x] Firestore real-time sync implemented and visible in UI.
+- [x] Debug console logs available for live sync proof.
+- [x] Optional Firebase Storage integration added.
+- [ ] Add screenshots of login and live task updates.
+- [ ] Record demo video showing updates across devices/tabs.
+- [ ] Add Drive video link and PR link in submission form.
+
+## Reflection
+
+Firebase reduced backend complexity by handling the three core needs of collaborative mobile apps:
+
+- **Secure access** through Firebase Auth,
+- **Real-time synchronization** through Cloud Firestore,
+- **Scalable file handling** through Firebase Storage.
+
+Instead of building and maintaining custom servers, session logic, and realtime sockets, this app uses managed Firebase services. That allowed faster implementation of core product behavior and a smoother multi-device experience.
+
+## Important Note
+
+`lib/firebase_options.dart` currently contains placeholder values. Replace it by running `flutterfire configure` and using the generated configuration before production use.
