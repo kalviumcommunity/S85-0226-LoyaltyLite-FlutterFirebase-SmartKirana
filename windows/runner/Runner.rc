@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "school_event_planner" "\0"
+            VALUE "FileDescription", "smart_kirana" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "school_event_planner" "\0"
+            VALUE "InternalName", "smart_kirana" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "school_event_planner.exe" "\0"
-            VALUE "ProductName", "school_event_planner" "\0"
+            VALUE "OriginalFilename", "smart_kirana.exe" "\0"
+            VALUE "ProductName", "smart_kirana" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

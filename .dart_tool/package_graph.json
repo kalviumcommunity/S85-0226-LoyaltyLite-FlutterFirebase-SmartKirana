@@ -1,10 +1,10 @@
 {
   "roots": [
-    "school_event_planner"
+    "smart_kirana"
   ],
   "packages": [
     {
-      "name": "school_event_planner",
+      "name": "smart_kirana",
       "version": "1.0.0+1",
       "dependencies": [
         "cloud_firestore",
