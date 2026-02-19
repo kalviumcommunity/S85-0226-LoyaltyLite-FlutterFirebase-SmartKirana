@@ -5,19 +5,29 @@ class AuthService {
 
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
-  Future<void> signUp(String email, String password) {
-    return _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  Future<User?> signUp(String email, String password) async {
+    try {
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user;
+    } catch (_) {
+      return null;
+    }
   }
 
-  Future<void> signIn(String email, String password) {
-    return _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  Future<User?> login(String email, String password) async {
+    try {
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user;
+    } catch (_) {
+      return null;
+    }
   }
 
-  Future<void> signOut() => _auth.signOut();
+  Future<void> logout() => _auth.signOut();
 }
