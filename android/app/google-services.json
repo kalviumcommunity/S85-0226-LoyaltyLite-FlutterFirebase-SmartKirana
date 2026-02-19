@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "342495894112",
+    "project_id": "smartkirana-58eb9",
+    "storage_bucket": "smartkirana-58eb9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342495894112:android:6dfa7737ce27d937304105",
+        "android_client_info": {
+          "package_name": "com.smartKirana.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCNDDXEDT3m0LNipJsXY-iBX_ktazMbWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

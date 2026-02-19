@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'welcome_screen.dart';
 
 class ResponsiveHome extends StatefulWidget {
   const ResponsiveHome({Key? key}) : super(key: key);
@@ -9,77 +8,44 @@ class ResponsiveHome extends StatefulWidget {
 }
 
 class _ResponsiveHomeState extends State<ResponsiveHome> {
-  int _selectedTabIndex = 0;
+  int _selectedEventIndex = 0;
 
-  final List<Map<String, dynamic>> _eventCategories = [
+  final List<Map<String, String>> _eventCategories = [
     {
       'title': 'Creative Events',
-      'icon': Icons.lightbulb_outline,
-      'color': Colors.amber,
-      'count': 12,
-      'description': 'Innovative and unique event ideas'
+      'description': 'Unconventional ideas that inspire creativity',
+      'icon': 'lightbulb',
+      'color': 'amber'
     },
     {
       'title': 'Sports Activities',
-      'icon': Icons.sports_soccer,
-      'color': Colors.green,
-      'count': 8,
-      'description': 'Physical and competitive events'
+      'description': 'Physical challenges and competitions',
+      'icon': 'sports_soccer',
+      'color': 'green'
     },
     {
-      'title': 'Cultural Programs',
-      'icon': Icons.theater_comedy,
-      'color': Colors.purple,
-      'count': 15,
-      'description': 'Arts and cultural celebrations'
-    },
-    {
-      'title': 'Tech Workshops',
-      'icon': Icons.computer,
-      'color': Colors.blue,
-      'count': 10,
-      'description': 'Technology and innovation workshops'
+      'title': 'Academic Competitions',
+      'description': 'Intellectual challenges and learning',
+      'icon': 'school',
+      'color': 'blue'
     },
     {
       'title': 'Social Gatherings',
-      'icon': Icons.groups,
-      'color': Colors.red,
-      'count': 6,
-      'description': 'Community building activities'
+      'description': 'Community building and networking',
+      'icon': 'groups',
+      'color': 'purple'
     },
     {
-      'title': 'Academic Events',
-      'icon': Icons.school,
-      'color': Colors.indigo,
-      'count': 9,
-      'description': 'Educational and learning events'
-    }
-  ];
-
-  final List<Map<String, String>> _upcomingEvents = [
-    {
-      'title': 'Reverse Day Festival',
-      'date': 'Dec 15, 2024',
-      'time': '9:00 AM',
-      'type': 'Creative'
+      'title': 'Cultural Events',
+      'description': 'Celebrating diversity and traditions',
+      'icon': 'celebration',
+      'color': 'red'
     },
     {
-      'title': 'Tech Innovation Summit',
-      'date': 'Dec 18, 2024',
-      'time': '2:00 PM',
-      'type': 'Tech'
-    },
-    {
-      'title': 'Cultural Heritage Day',
-      'date': 'Dec 20, 2024',
-      'time': '10:00 AM',
-      'type': 'Cultural'
-    },
-    {
-      'title': 'Sports Championship',
-      'date': 'Dec 22, 2024',
-      'time': '3:00 PM',
-      'type': 'Sports'
+      'title': 'Tech Workshops',
+      'description': 'Hands-on technology learning',
+      'icon': 'computer',
+      'color': 'indigo'
     }
   ];
 
@@ -92,488 +58,473 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
           double screenHeight = constraints.maxHeight;
           bool isTablet = screenWidth > 600;
           bool isDesktop = screenWidth > 1200;
-          bool isLandscape = screenWidth > screenHeight;
+          bool isLandscape = constraints.maxWidth > constraints.maxHeight;
 
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(screenWidth, isTablet),
-              SliverToBoxAdapter(
-                child: _buildHeaderSection(screenWidth, isTablet),
+          return Column(
+            children: [
+              // Responsive Header
+              _buildResponsiveHeader(screenWidth, isTablet, isLandscape),
+              
+              // Main Content Area
+              Expanded(
+                child: _buildMainContent(screenWidth, screenHeight, isTablet, isDesktop, isLandscape),
               ),
-              SliverToBoxAdapter(
-                child: _buildCategoriesSection(screenWidth, isTablet, isDesktop),
-              ),
-              SliverToBoxAdapter(
-                child: _buildUpcomingEventsSection(screenWidth, isTablet, isLandscape),
-              ),
-              SliverToBoxAdapter(
-                child: _buildFooterSection(screenWidth, isTablet),
-              ),
+              
+              // Responsive Footer
+              _buildResponsiveFooter(screenWidth, isTablet),
             ],
           );
         },
       ),
-      floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildAppBar(double screenWidth, bool isTablet) {
-    return SliverAppBar(
-      expandedHeight: isTablet ? 120 : 100,
-      floating: false,
-      pinned: true,
-      backgroundColor: Colors.deepPurple,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          'Event Planner',
-          style: TextStyle(
-            fontSize: isTablet ? 28 : 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        titlePadding: EdgeInsets.only(
-          left: isTablet ? 20 : 16,
-          bottom: isTablet ? 20 : 16,
-        ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.deepPurple,
-                Colors.blue.shade600,
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.search, size: isTablet ? 28 : 24),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(Icons.notifications, size: isTablet ? 28 : 24),
-          onPressed: () {},
-        ),
-        if (isTablet)
-          IconButton(
-            icon: Icon(Icons.settings, size: 28),
-            onPressed: () {},
-          ),
-      ],
-    );
-  }
-
-  Widget _buildHeaderSection(double screenWidth, bool isTablet) {
-    double padding = isTablet ? 24.0 : 16.0;
-    double titleSize = isTablet ? 32 : 24;
-    double subtitleSize = isTablet ? 18 : 14;
+  Widget _buildResponsiveHeader(double screenWidth, bool isTablet, bool isLandscape) {
+    double headerHeight = isLandscape ? 80 : (isTablet ? 120 : 100);
+    double fontSize = isTablet ? 24 : 20;
+    double iconSize = isTablet ? 32 : 24;
 
     return Container(
+      height: headerHeight,
       width: double.infinity,
-      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.deepPurple.shade50, Colors.white],
+          colors: [Colors.deepPurple.shade600, Colors.blue.shade600],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome Back!',
-            style: TextStyle(
-              fontSize: titleSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple.shade800,
-            ),
-          ),
-          SizedBox(height: isTablet ? 12 : 8),
-          Text(
-            'Discover and plan amazing school events using creative thinking techniques',
-            style: TextStyle(
-              fontSize: subtitleSize,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          SizedBox(height: isTablet ? 20 : 16),
-          _buildQuickActionButtons(screenWidth, isTablet),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActionButtons(double screenWidth, bool isTablet) {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-              );
-            },
-            icon: Icon(Icons.lightbulb, size: isTablet ? 24 : 20),
-            label: Text(
-              'Generate Ideas',
-              style: TextStyle(fontSize: isTablet ? 16 : 14),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(
-                vertical: isTablet ? 16 : 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: isTablet ? 16 : 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {},
-            icon: Icon(Icons.calendar_today, size: isTablet ? 24 : 20),
-            label: Text(
-              'View Calendar',
-              style: TextStyle(fontSize: isTablet ? 16 : 14),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(
-                vertical: isTablet ? 16 : 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoriesSection(double screenWidth, bool isTablet, bool isDesktop) {
-    int crossAxisCount = isDesktop ? 3 : (isTablet ? 2 : 1);
-    double childAspectRatio = isDesktop ? 1.2 : (isTablet ? 1.4 : 1.6);
-    double spacing = isDesktop ? 20 : (isTablet ? 16 : 12);
-
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Event Categories',
-            style: TextStyle(
-              fontSize: isTablet ? 28 : 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple.shade800,
-            ),
-          ),
-          SizedBox(height: isTablet ? 20 : 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: childAspectRatio,
-              crossAxisSpacing: spacing,
-              mainAxisSpacing: spacing,
-            ),
-            itemCount: _eventCategories.length,
-            itemBuilder: (context, index) {
-              final category = _eventCategories[index];
-              return _buildCategoryCard(category, isTablet);
-            },
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCategoryCard(Map<String, dynamic> category, bool isTablet) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 16 : 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.all(isTablet ? 12 : 8),
-                decoration: BoxDecoration(
-                  color: category['color'].shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  category['icon'],
-                  size: isTablet ? 32 : 24,
-                  color: category['color'].shade600,
-                ),
-              ),
-              SizedBox(height: isTablet ? 12 : 8),
-              Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 24 : 16,
+          vertical: 8,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.event,
+              size: iconSize,
+              color: Colors.white,
+            ),
+            SizedBox(width: isTablet ? 16 : 12),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
                 child: Text(
-                  category['title'],
+                  'School Event Planner',
                   style: TextStyle(
-                    fontSize: isTablet ? 18 : 16,
+                    color: Colors.white,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              SizedBox(height: isTablet ? 8 : 4),
-              Text(
-                category['description'],
-                style: TextStyle(
-                  fontSize: isTablet ? 14 : 12,
-                  color: Colors.grey.shade600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            ),
+            if (isTablet) ...[
+              Icon(
+                Icons.phone_android,
+                size: iconSize,
+                color: Colors.white,
               ),
-              SizedBox(height: isTablet ? 8 : 4),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 8 : 6,
-                  vertical: isTablet ? 4 : 2,
+              const SizedBox(width: 8),
+              Text(
+                '${screenWidth.toInt()}px',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: fontSize * 0.7,
                 ),
-                decoration: BoxDecoration(
-                  color: category['color'].shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${category['count']} events',
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(double screenWidth, double screenHeight, bool isTablet, bool isDesktop, bool isLandscape) {
+    if (isDesktop) {
+      return _buildDesktopLayout(screenWidth, screenHeight);
+    } else if (isTablet && !isLandscape) {
+      return _buildTabletLayout(screenWidth, screenHeight);
+    } else {
+      return _buildMobileLayout(screenWidth, screenHeight);
+    }
+  }
+
+  Widget _buildDesktopLayout(double screenWidth, double screenHeight) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Row(
+        children: [
+          // Left Panel - Categories
+          Expanded(
+            flex: 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Event Categories',
                   style: TextStyle(
-                    fontSize: isTablet ? 12 : 10,
-                    color: category['color'].shade700,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple.shade800,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 1.2,
+                    ),
+                    itemCount: _eventCategories.length,
+                    itemBuilder: (context, index) {
+                      return _buildCategoryCard(_eventCategories[index], true);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 24),
+          // Right Panel - Selected Category Details
+          Expanded(
+            flex: 1,
+            child: _buildCategoryDetails(_eventCategories[_selectedEventIndex]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout(double screenWidth, double screenHeight) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            'Choose Event Category',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple.shade800,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.1,
+              ),
+              itemCount: _eventCategories.length,
+              itemBuilder: (context, index) {
+                return _buildCategoryCard(_eventCategories[index], false);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(double screenWidth, double screenHeight) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          Text(
+            'Event Categories',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple.shade800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _eventCategories.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: _buildCategoryCard(_eventCategories[index], false),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(Map<String, String> category, bool isDesktop) {
+    IconData iconData = _getIconData(category['icon']!);
+    Color cardColor = _getColorFromName(category['color']!);
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedEventIndex = _eventCategories.indexOf(category);
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.all(isDesktop ? 16 : 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              colors: [cardColor.withOpacity(0.1), cardColor.withOpacity(0.05)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                iconData,
+                size: isDesktop ? 40 : 32,
+                color: cardColor,
+              ),
+              SizedBox(height: isDesktop ? 12 : 8),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  category['title']!,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 16 : 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple.shade800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (isDesktop) ...[
+                const SizedBox(height: 8),
+                Text(
+                  category['description']!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryDetails(Map<String, String> category) {
+    IconData iconData = _getIconData(category['icon']!);
+    Color cardColor = _getColorFromName(category['color']!);
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(iconData, size: 48, color: cardColor),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  category['title']!,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple.shade800,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpcomingEventsSection(double screenWidth, bool isTablet, bool isLandscape) {
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      color: Colors.grey.shade50,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          const SizedBox(height: 20),
           Text(
-            'Upcoming Events',
+            category['description']!,
             style: TextStyle(
-              fontSize: isTablet ? 28 : 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple.shade800,
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              height: 1.5,
             ),
           ),
-          SizedBox(height: isTablet ? 20 : 16),
-          if (isLandscape && isTablet)
-            _buildLandscapeEventsGrid(isTablet)
-          else
-            _buildPortraitEventsList(isTablet),
+          const SizedBox(height: 24),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cardColor.withOpacity(0.1), cardColor.withOpacity(0.05)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.event_available,
+                    size: 64,
+                    color: cardColor.withOpacity(0.7),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Event Ideas Coming Soon',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.deepPurple.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildLandscapeEventsGrid(bool isTablet) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.5,
-        crossAxisSpacing: isTablet ? 16 : 12,
-        mainAxisSpacing: isTablet ? 16 : 12,
+  Widget _buildResponsiveFooter(double screenWidth, bool isTablet) {
+    double footerHeight = isTablet ? 80 : 70;
+    double buttonHeight = isTablet ? 48 : 40;
+    double fontSize = isTablet ? 16 : 14;
+
+    return Container(
+      height: footerHeight,
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24 : 16,
+        vertical: 12,
       ),
-      itemCount: _upcomingEvents.length,
-      itemBuilder: (context, index) {
-        final event = _upcomingEvents[index];
-        return _buildEventCard(event, isTablet);
-      },
-    );
-  }
-
-  Widget _buildPortraitEventsList(bool isTablet) {
-    return Column(
-      children: _upcomingEvents.map((event) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: isTablet ? 16 : 12),
-          child: _buildEventCard(event, isTablet),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildEventCard(Map<String, String> event, bool isTablet) {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        contentPadding: EdgeInsets.all(isTablet ? 16 : 12),
-        leading: Container(
-          padding: EdgeInsets.all(isTablet ? 8 : 6),
-          decoration: BoxDecoration(
-            color: Colors.deepPurple.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.event,
-            color: Colors.deepPurple.shade600,
-            size: isTablet ? 24 : 20,
-          ),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border(
+          top: BorderSide(color: Colors.grey.shade300),
         ),
-        title: Text(
-          event['title']!,
-          style: TextStyle(
-            fontSize: isTablet ? 16 : 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: isTablet ? 4 : 2),
-            Text(
-              '${event['date']} • ${event['time']}',
-              style: TextStyle(
-                fontSize: isTablet ? 14 : 12,
-                color: Colors.grey.shade600,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Creating new event...'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: Text(
+                'Create Event',
+                style: TextStyle(fontSize: fontSize),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple.shade600,
+                foregroundColor: Colors.white,
+                minimumSize: Size(0, buttonHeight),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            SizedBox(height: isTablet ? 4 : 2),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? 8 : 6,
-                vertical: isTablet ? 2 : 1,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.green.shade100,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                event['type']!,
-                style: TextStyle(
-                  fontSize: isTablet ? 12 : 10,
-                  color: Colors.green.shade700,
-                  fontWeight: FontWeight.w600,
+          ),
+          if (isTablet) ...[
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Viewing all events...'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.list),
+                label: Text(
+                  'View All Events',
+                  style: TextStyle(fontSize: fontSize),
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(0, buttonHeight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
           ],
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: isTablet ? 20 : 16,
-          color: Colors.grey.shade400,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooterSection(double screenWidth, bool isTablet) {
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      child: Column(
-        children: [
-          Divider(height: isTablet ? 32 : 24),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: isTablet ? 16 : 12,
-            runSpacing: isTablet ? 12 : 8,
-            children: [
-              _buildFooterButton('About Us', Icons.info, isTablet),
-              _buildFooterButton('Contact', Icons.contact_mail, isTablet),
-              _buildFooterButton('Settings', Icons.settings, isTablet),
-              _buildFooterButton('Help', Icons.help_outline, isTablet),
-            ],
-          ),
-          SizedBox(height: isTablet ? 20 : 16),
-          Text(
-            '© 2024 School Event Planner. Made with ❤️ using Flutter',
-            style: TextStyle(
-              fontSize: isTablet ? 14 : 12,
-              color: Colors.grey.shade600,
-            ),
-            textAlign: TextAlign.center,
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildFooterButton(String text, IconData icon, bool isTablet) {
-    return TextButton.icon(
-      onPressed: () {},
-      icon: Icon(icon, size: isTablet ? 20 : 16),
-      label: Text(
-        text,
-        style: TextStyle(fontSize: isTablet ? 14 : 12),
-      ),
-    );
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'lightbulb':
+        return Icons.lightbulb;
+      case 'sports_soccer':
+        return Icons.sports_soccer;
+      case 'school':
+        return Icons.school;
+      case 'groups':
+        return Icons.groups;
+      case 'celebration':
+        return Icons.celebration;
+      case 'computer':
+        return Icons.computer;
+      default:
+        return Icons.event;
+    }
   }
 
-  Widget _buildFloatingActionButton() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        );
-      },
-      icon: const Icon(Icons.add),
-      label: const Text('New Event'),
-      backgroundColor: Colors.deepPurple,
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _selectedTabIndex,
-      onTap: (index) {
-        setState(() {
-          _selectedTabIndex = index;
-        });
-      },
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.deepPurple,
-      unselectedItemColor: Colors.grey,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: 'Events',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.lightbulb),
-          label: 'Ideas',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
-    );
+  Color _getColorFromName(String colorName) {
+    switch (colorName) {
+      case 'amber':
+        return Colors.amber;
+      case 'green':
+        return Colors.green;
+      case 'blue':
+        return Colors.blue;
+      case 'purple':
+        return Colors.purple;
+      case 'red':
+        return Colors.red;
+      case 'indigo':
+        return Colors.indigo;
+      default:
+        return Colors.grey;
+    }
   }
 }

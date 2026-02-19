@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // This is a basic Flutter widget test.
 //
 // To perform an interaction with a widget in your test, use the WidgetTester
@@ -26,5 +27,19 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+=======
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:school_event_planner/screens/welcome_screen.dart';
+
+void main() {
+  testWidgets('Welcome screen renders title', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: WelcomeScreen()),
+    );
+
+    expect(find.text('School Event Planning'), findsOneWidget);
+>>>>>>> 801a838a08a094474c7b11d405e26121198fda24
   });
 }
