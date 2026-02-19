@@ -147,3 +147,9 @@ Instead of building and maintaining custom servers, session logic, and realtime 
 ## Important Note
 
 `lib/firebase_options.dart` currently contains placeholder values. Replace it by running `flutterfire configure` and using the generated configuration before production use.
+
+## Project Structure
+
+Detailed explanation available in:
+PROJECT_STRUCTURE.md
+
