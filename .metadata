@@ -15,11 +15,11 @@ migration:
     - platform: root
       create_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
       base_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
-<<<<<<< HEAD
+
     - platform: web
       create_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
       base_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
-=======
+
     - platform: android
       create_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
       base_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
@@ -38,7 +38,7 @@ migration:
     - platform: windows
       create_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
       base_revision: 582a0e7c5581dc0ca5f7bfd8662bb8db6f59d536
->>>>>>> 801a838a08a094474c7b11d405e26121198fda24
+
 
   # User provided section
 

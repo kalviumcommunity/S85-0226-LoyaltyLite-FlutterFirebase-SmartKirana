@@ -6,11 +6,17 @@ import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/storage_service.dart';
-import 'screens/welcome_screen.dart';
+ import 'screens/welcome_screen.dart';
 import 'screens/responsive_home.dart';
 
 void main() {
-  runApp(const LoyaltyLiteFirebaseApp());
+ 
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+   runApp(const LoyaltyLiteFirebaseApp());
 }
 
 class LoyaltyLiteFirebaseApp extends StatelessWidget {
@@ -20,6 +26,7 @@ class LoyaltyLiteFirebaseApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LoyaltyLite Firebase Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -69,6 +76,7 @@ class _MainNavigationState extends State<MainNavigation> {
         selectedItemColor: Colors.deepPurple,
         unselectedItemColor: Colors.grey,
       ),
+      home: const RootScreen(),
     );
   }
 }
