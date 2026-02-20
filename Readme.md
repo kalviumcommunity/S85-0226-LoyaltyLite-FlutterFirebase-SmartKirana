@@ -1,39 +1,34 @@
-# LoyaltyLite Firebase Integration
+# SmartKirana Firebase Integration (Sprint 2)
 
-This assignment demonstrates how Firebase solves backend challenges in a mobile app without managing custom servers.
+## Project Title
 
-## Objective
+SmartKirana – Firebase Authentication and Firestore CRUD Integration
 
-Learn how Firebase enables:
+## Short Description
 
-- secure authentication,
-- real-time database synchronization,
-- scalable file storage,
+This Flutter project integrates Firebase Authentication and Cloud Firestore to support secure signup/login/logout and real-time CRUD operations for user notes.
 
-and how these services work together to deliver a smooth multi-device user experience.
+## Firebase Setup Instructions
 
-## Firebase Setup (Flutter)
+### 1) Create Firebase project
 
-### 1) Create and connect Firebase project
-
-1. Open Firebase Console and create a project.
-2. Add Android and/or iOS apps.
-3. Download configuration files:
+1. Open Firebase Console and create a new project.
+2. Add Android app and iOS app.
+3. Download config files and place them in:
    - `android/app/google-services.json`
    - `ios/Runner/GoogleService-Info.plist`
-4. Run FlutterFire CLI in project root:
+
+### 2) Configure FlutterFire
+
+Run in project root:
 
 ```bash
 flutterfire configure
 ```
 
-5. Install dependencies:
+### 3) Install dependencies
 
-```bash
-flutter pub get
-```
-
-### 2) Dependencies used
+Already included in `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -42,109 +37,140 @@ dependencies:
   firebase_core: ^3.0.0
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.0.0
-  firebase_storage: ^12.0.0
 ```
 
-### 3) Firebase initialization
+Then run:
 
-Firebase is initialized in `lib/main.dart`:
+```bash
+flutter pub get
+```
+
+### 4) Firebase initialization in app
+
+`lib/main.dart` initializes Firebase:
 
 ```dart
 Future<void> main() async {
-   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-   );
-   runApp(const LoyaltyLiteFirebaseApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const SmartKiranaApp());
 }
 ```
-
-## Key Firebase Services in This App
-
-| Service                    | Purpose                                  | Assignment implementation                  |
-| -------------------------- | ---------------------------------------- | ------------------------------------------ |
-| Firebase Authentication    | Secure sign-up/sign-in and session state | Email + password sign-up/sign-in, sign-out |
-| Cloud Firestore            | Real-time NoSQL data sync                | `tasks` collection with live task updates  |
-| Firebase Storage           | Upload and host files                    | Optional upload of sync evidence text file |
-| Cloud Functions (optional) | Serverless backend logic                 | Not required in this implementation        |
 
 ## Implemented Features
 
 ### 1) Firebase Authentication
 
-- Sign up and sign in with email/password.
-- Auth state listener automatically moves user between login and task screens.
-- Success/error messages shown using SnackBars.
-
-Files:
-
 - `lib/services/auth_service.dart`
-- `lib/main.dart`
+  - `signUp(email, password)`
+  - `login(email, password)`
+  - `logout()`
+- `lib/screens/signup_screen.dart`
+- `lib/screens/login_screen.dart`
+- Auth routing in `lib/main.dart` using `FirebaseAuth.instance.authStateChanges()`.
 
-### 2) Firestore Real-Time Data
-
-- Add new tasks to Firestore with server timestamps.
-- Read tasks using `snapshots()` for live updates.
-- UI updates automatically via `StreamBuilder` (no manual refresh).
-- Debug logs added to prove live sync events in console.
-
-Files:
+### 2) Cloud Firestore CRUD
 
 - `lib/services/firestore_service.dart`
-- `lib/main.dart`
+  - `addUserData(uid, data)`
+  - `createNote(uid, text)`
+  - `streamNotes(uid)`
+  - `updateNote(noteId, updatedText)`
+  - `deleteNote(noteId)`
+- `lib/screens/dashboard_screen.dart`
+  - Add note
+  - Real-time list (`StreamBuilder`)
+  - Edit note
+  - Delete note
 
-### 3) Optional Firebase Storage
+## Code Snippets
 
-- Upload an optional text file as sync evidence.
-- Retrieve and show download URL after successful upload.
-
-Files:
-
-- `lib/services/storage_service.dart`
-- `lib/main.dart`
-
-## Why Firestore Sync Is Real-Time
-
-The app uses Firestore live query streams:
+### Authentication logic
 
 ```dart
-FirebaseFirestore.instance
-   .collection('tasks')
-   .where('uid', isEqualTo: uid)
-   .orderBy('createdAt', descending: true)
-   .snapshots()
+final user = await _authService.login(email, password);
+if (user == null) {
+  // show error
+}
 ```
 
-When one user/device writes data, all connected clients subscribed to the same query receive updates instantly. This removes polling and manual refresh logic.
+### Firestore create/read/update/delete
 
-## Run Instructions
+```dart
+await _firestoreService.createNote(uid: user.uid, text: 'First note');
+
+stream: _firestoreService.streamNotes(user.uid)
+
+await _firestoreService.updateNote(noteId: noteId, updatedText: 'Updated');
+
+await _firestoreService.deleteNote(noteId);
+```
+
+## Test Authentication and Data Persistence
+
+Run app:
 
 ```bash
-flutter pub get
 flutter run
 ```
 
-## Evidence Checklist for Submission
+Perform checks:
 
-- [x] Firebase Auth flow implemented and working.
-- [x] Firestore real-time sync implemented and visible in UI.
-- [x] Debug console logs available for live sync proof.
-- [x] Optional Firebase Storage integration added.
-- [ ] Add screenshots of login and live task updates.
-- [ ] Record demo video showing updates across devices/tabs.
-- [ ] Add Drive video link and PR link in submission form.
+- Create a new user via signup screen.
+- Login with created credentials.
+- Add note in dashboard.
+- Edit the note.
+- Delete the note.
+- Verify Authentication records in Firebase Console.
+- Verify Firestore records in `notes` collection update in real-time.
+
+## Screenshots (Add before final submission)
+
+Add screenshots to `docs/screenshots/` and reference them below.
+
+- User successfully logged in
+- Firestore data displayed in dashboard
+- Authentication record in Firebase Console
+- Firestore record in Firebase Console
+
+Example markdown after adding images:
+
+```md
+![Login success](docs/screenshots/login-success.png)
+![Firestore notes](docs/screenshots/firestore-notes.png)
+![Firebase Auth console](docs/screenshots/firebase-auth-console.png)
+![Firestore console](docs/screenshots/firestore-console.png)
+```
 
 ## Reflection
 
-Firebase reduced backend complexity by handling the three core needs of collaborative mobile apps:
+Challenges faced:
 
-- **Secure access** through Firebase Auth,
-- **Real-time synchronization** through Cloud Firestore,
-- **Scalable file handling** through Firebase Storage.
+- Correctly wiring platform Firebase config files and FlutterFire setup.
+- Handling authentication state transitions cleanly between screens.
+- Structuring Firestore queries and updates to keep UI real-time and stable.
 
-Instead of building and maintaining custom servers, session logic, and realtime sockets, this app uses managed Firebase services. That allowed faster implementation of core product behavior and a smoother multi-device experience.
+How Firebase improves scalability and collaboration:
 
-## Important Note
+- Firebase Authentication provides secure, managed user auth without custom backend code.
+- Cloud Firestore enables real-time sync across devices with minimal client logic.
+- Managed infrastructure allows faster iteration and easier scaling for small teams.
+
+## Submission Guidelines
+
+### Commit message
+
+```bash
+feat: integrated Firebase Auth and Firestore with working login and data flow
+```
+
+### Pull Request title
+
+```text
+[Sprint-2] Firebase Integration – TeamName
+```
+
+### PR description should include
 
 `lib/firebase_options.dart` currently contains placeholder values. Replace it by running `flutterfire configure` and using the generated configuration before production use.
 
@@ -153,3 +179,6 @@ Instead of building and maintaining custom servers, session logic, and realtime 
 Detailed explanation available in:
 PROJECT_STRUCTURE.md
 
+- Summary of implemented Firebase features
+- Screenshots of authentication and Firestore
+- Reflection on learning outcomes
