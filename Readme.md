@@ -1,184 +1,91 @@
-# SmartKirana Firebase Integration (Sprint 2)
+# Flutter Environment Setup and Verification
 
-## Project Title
+## Brief Description
 
-SmartKirana – Firebase Authentication and Firestore CRUD Integration
+This document verifies a complete Flutter development environment setup on Windows, including Flutter SDK installation, Android Studio + plugins configuration, emulator setup, and successful first app run.
 
-## Short Description
+## Steps Followed
 
-This Flutter project integrates Firebase Authentication and Cloud Firestore to support secure signup/login/logout and real-time CRUD operations for user notes.
+### 1) Install Flutter SDK
 
-## Firebase Setup Instructions
-
-### 1) Create Firebase project
-
-1. Open Firebase Console and create a new project.
-2. Add Android app and iOS app.
-3. Download config files and place them in:
-   - `android/app/google-services.json`
-   - `ios/Runner/GoogleService-Info.plist`
-
-### 2) Configure FlutterFire
-
-Run in project root:
+- Downloaded Flutter SDK from the official Flutter website.
+- Extracted SDK to a local development directory.
+- Added `flutter\bin` to system `PATH` through Environment Variables.
+- Opened a new terminal and verified setup using:
 
 ```bash
-flutterfire configure
+flutter doctor
 ```
 
-### 3) Install dependencies
+### 2) Set Up Android Studio / VS Code
 
-Already included in `pubspec.yaml`:
+- Installed Android Studio.
+- Confirmed Android SDK, Android SDK Platform tools, and AVD Manager were installed.
+- Installed Flutter and Dart plugins.
+- VS Code can also be used with Flutter and Dart extensions from Marketplace.
 
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  firebase_core: ^3.0.0
-  firebase_auth: ^5.0.0
-  cloud_firestore: ^5.0.0
-```
+### 3) Configure and Launch Emulator
 
-Then run:
+- Created Android Virtual Device from AVD Manager.
+- Used a modern device profile and Android 13+ image.
+- Started emulator and verified visibility to Flutter:
 
 ```bash
-flutter pub get
+flutter devices
 ```
 
-### 4) Firebase initialization in app
+### 4) Create and Run First Flutter App
 
-`lib/main.dart` initializes Firebase:
-
-```dart
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const SmartKiranaApp());
-}
-```
-
-## Implemented Features
-
-### 1) Firebase Authentication
-
-- `lib/services/auth_service.dart`
-  - `signUp(email, password)`
-  - `login(email, password)`
-  - `logout()`
-- `lib/screens/signup_screen.dart`
-- `lib/screens/login_screen.dart`
-- Auth routing in `lib/main.dart` using `FirebaseAuth.instance.authStateChanges()`.
-
-### 2) Cloud Firestore CRUD
-
-- `lib/services/firestore_service.dart`
-  - `addUserData(uid, data)`
-  - `createNote(uid, text)`
-  - `streamNotes(uid)`
-  - `updateNote(noteId, updatedText)`
-  - `deleteNote(noteId)`
-- `lib/screens/dashboard_screen.dart`
-  - Add note
-  - Real-time list (`StreamBuilder`)
-  - Edit note
-  - Delete note
-
-## Code Snippets
-
-### Authentication logic
-
-```dart
-final user = await _authService.login(email, password);
-if (user == null) {
-  // show error
-}
-```
-
-### Firestore create/read/update/delete
-
-```dart
-await _firestoreService.createNote(uid: user.uid, text: 'First note');
-
-stream: _firestoreService.streamNotes(user.uid)
-
-await _firestoreService.updateNote(noteId: noteId, updatedText: 'Updated');
-
-await _firestoreService.deleteNote(noteId);
-```
-
-## Test Authentication and Data Persistence
-
-Run app:
+- Created app using:
 
 ```bash
+flutter create first_flutter_app
+cd first_flutter_app
 flutter run
 ```
 
-Perform checks:
+- Verified default Flutter counter app launches on emulator.
 
-- Create a new user via signup screen.
-- Login with created credentials.
-- Add note in dashboard.
-- Edit the note.
-- Delete the note.
-- Verify Authentication records in Firebase Console.
-- Verify Firestore records in `notes` collection update in real-time.
+## Setup Verification
 
-## Screenshots (Add before final submission)
+### Flutter Doctor Output
 
-Add screenshots to `docs/screenshots/` and reference them below.
+![Flutter Doctor checks](flutterdoctor.png)
 
-- User successfully logged in
-- Firestore data displayed in dashboard
-- Authentication record in Firebase Console
-- Firestore record in Firebase Console
+### Emulator Running Flutter App
 
-Example markdown after adding images:
-
-```md
-![Login success](docs/screenshots/login-success.png)
-![Firestore notes](docs/screenshots/firestore-notes.png)
-![Firebase Auth console](docs/screenshots/firebase-auth-console.png)
-![Firestore console](docs/screenshots/firestore-console.png)
-```
+![Default Flutter app running on emulator](flutterrun.png)
 
 ## Reflection
 
-Challenges faced:
+### Challenges Faced
 
-- Correctly wiring platform Firebase config files and FlutterFire setup.
-- Handling authentication state transitions cleanly between screens.
-- Structuring Firestore queries and updates to keep UI real-time and stable.
+- Initial environment path/toolchain validation took a few iterations.
+- Ensuring all Android toolchain components were installed correctly.
+- Emulator performance tuning and first launch wait time.
 
-How Firebase improves scalability and collaboration:
+### How This Setup Helps Flutter Development
 
-- Firebase Authentication provides secure, managed user auth without custom backend code.
-- Cloud Firestore enables real-time sync across devices with minimal client logic.
-- Managed infrastructure allows faster iteration and easier scaling for small teams.
+- Provides a stable local workflow for build, run, and debug.
+- Enables fast iteration with emulator/device testing.
+- Establishes the baseline required for future Firebase and feature integration work in this project.
 
 ## Submission Guidelines
 
-### Commit message
+### Commit Message
 
 ```bash
-feat: integrated Firebase Auth and Firestore with working login and data flow
+setup: completed Flutter SDK installation and first emulator run
 ```
 
-### Pull Request title
+### Pull Request Title
 
 ```text
-[Sprint-2] Firebase Integration – TeamName
+[Sprint-2] Flutter Environment Setup – TeamName
 ```
 
-### PR description should include
+### PR Description Checklist
 
-`lib/firebase_options.dart` currently contains placeholder values. Replace it by running `flutterfire configure` and using the generated configuration before production use.
-
-## Project Structure
-
-Detailed explanation available in:
-PROJECT_STRUCTURE.md
-
-- Summary of implemented Firebase features
-- Screenshots of authentication and Firestore
-- Reflection on learning outcomes
+- Steps followed for setup and verification.
+- Screenshots included from README.
+- Short reflection on installation/setup experience.
