@@ -1,91 +1,59 @@
-# Flutter Environment Setup and Verification
+# Flutter Folder Structure Exploration (SmartKirana)
 
 ## Brief Description
 
-This document verifies a complete Flutter development environment setup on Windows, including Flutter SDK installation, Android Studio + plugins configuration, emulator setup, and successful first app run.
+This sprint explores and documents the default Flutter project structure and explains the role of each core folder and configuration file used for app development, platform builds, and maintainability.
 
-## Steps Followed
+## Summary
 
-### 1) Install Flutter SDK
+- Detailed folder explanation is documented in [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
+- Core directories reviewed: `lib/`, `android/`, `ios/`, `assets/`, `test/`, and `build/`.
+- Supporting files reviewed: `.gitignore`, `.dart_tool/`, `.idea/`, and `pubspec.yaml`.
 
-- Downloaded Flutter SDK from the official Flutter website.
-- Extracted SDK to a local development directory.
-- Added `flutter\bin` to system `PATH` through Environment Variables.
-- Opened a new terminal and verified setup using:
+## Screenshots of Folder Hierarchy
 
-```bash
-flutter doctor
-```
+> Replace these with your latest IDE hierarchy screenshots if needed.
 
-### 2) Set Up Android Studio / VS Code
-
-- Installed Android Studio.
-- Confirmed Android SDK, Android SDK Platform tools, and AVD Manager were installed.
-- Installed Flutter and Dart plugins.
-- VS Code can also be used with Flutter and Dart extensions from Marketplace.
-
-### 3) Configure and Launch Emulator
-
-- Created Android Virtual Device from AVD Manager.
-- Used a modern device profile and Android 13+ image.
-- Started emulator and verified visibility to Flutter:
-
-```bash
-flutter devices
-```
-
-### 4) Create and Run First Flutter App
-
-- Created app using:
-
-```bash
-flutter create first_flutter_app
-cd first_flutter_app
-flutter run
-```
-
-- Verified default Flutter counter app launches on emulator.
-
-## Setup Verification
-
-### Flutter Doctor Output
-
-![Flutter Doctor checks](flutterdoctor.png)
-
-### Emulator Running Flutter App
-
-![Default Flutter app running on emulator](flutterrun.png)
+![Folder hierarchy screenshot 1](flutterrun2.png)
+![Folder hierarchy screenshot 2](flutterrun.png)
 
 ## Reflection
 
-### Challenges Faced
+### Why is it important to understand each folder’s purpose?
 
-- Initial environment path/toolchain validation took a few iterations.
-- Ensuring all Android toolchain components were installed correctly.
-- Emulator performance tuning and first launch wait time.
+Understanding folder responsibilities helps developers locate code quickly, avoid accidental edits in generated/platform areas, and maintain cleaner architecture as features grow.
 
-### How This Setup Helps Flutter Development
+### How does a well-organized structure improve teamwork and development speed?
 
-- Provides a stable local workflow for build, run, and debug.
-- Enables fast iteration with emulator/device testing.
-- Establishes the baseline required for future Firebase and feature integration work in this project.
+A consistent structure enables parallel development, faster onboarding, easier reviews, and quicker debugging because everyone knows where to add or find specific logic.
 
 ## Submission Guidelines
 
 ### Commit Message
 
 ```bash
-setup: completed Flutter SDK installation and first emulator run
+docs: added Flutter project structure explanation and folder overview
 ```
 
 ### Pull Request Title
 
 ```text
-[Sprint-2] Flutter Environment Setup – TeamName
+[Sprint-2] Flutter Folder Structure Exploration – TeamName
 ```
 
-### PR Description Checklist
+### PR Description Template
 
-- Steps followed for setup and verification.
-- Screenshots included from README.
-- Short reflection on installation/setup experience.
+```markdown
+## Summary of Exploration
+
+- Reviewed Flutter core folders and supporting files.
+- Documented folder responsibilities and structure decisions.
+
+## Screenshot
+
+- Added IDE folder hierarchy screenshot(s).
+
+## Documentation Link
+
+- See PROJECT_STRUCTURE.md for full folder-by-folder explanation.
+```
