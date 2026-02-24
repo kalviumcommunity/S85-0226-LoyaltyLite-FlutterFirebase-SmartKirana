@@ -1,19 +1,16 @@
-name: smart_kirana
-description: A Flutter app for SmartKirana loyalty and Firebase-powered customer engagement.
-publish_to: "none"
+name: loyalbazaar
+description: A professional mobile application for small businesses in Tier-2 and Tier-3 towns in India to manage customer loyalty programs easily and affordably.
+
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  firebase_core: ^3.0.0
-  firebase_auth: ^5.0.0
-  cloud_firestore: ^5.0.0
-  firebase_storage: ^12.0.0
 
 dev_dependencies:
   flutter_test:
