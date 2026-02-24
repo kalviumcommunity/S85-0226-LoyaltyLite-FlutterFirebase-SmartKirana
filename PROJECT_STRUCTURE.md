@@ -1,94 +1,66 @@
-# Flutter Project Structure Overview
+# Flutter Project Structure Exploration
 
 ## Introduction
 
-This document explains the folder structure of a Flutter project and the purpose of each directory and configuration file. Understanding this structure helps maintain scalability and clean code organization.
+This document captures the folder structure exploration for the SmartKirana Flutter project. It explains how Flutter organizes application logic, platform-specific code, tooling metadata, and generated build output so the project stays scalable and maintainable.
 
----
+## Core Folder and File Purpose
 
-## Core Folders
+| Folder/File                | Purpose               | Key Details                                                                                                    |
+| -------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `lib/`                     | Main Dart source code | Contains `main.dart` (entry point) and app modules such as `screens/`, `widgets/`, `services/`, and `models/`. |
+| `android/`                 | Android native setup  | Includes Gradle scripts, AndroidManifest, and app-level configuration in `android/app/build.gradle.kts`.       |
+| `ios/`                     | iOS native setup      | Includes Xcode project files and metadata in `ios/Runner/Info.plist`.                                          |
+| `assets/`                  | Static resources      | Stores images, fonts, and data files used by the app. Must be declared in `pubspec.yaml`.                      |
+| `test/`                    | Testing code          | Contains unit/widget/integration tests, including default `widget_test.dart`.                                  |
+| `pubspec.yaml`             | Project manifest      | Defines dependencies, Flutter settings, assets, versions, and metadata.                                        |
+| `.gitignore`               | Git exclusions        | Prevents generated or local-only files from being committed.                                                   |
+| `build/`                   | Generated output      | Auto-generated compilation artifacts for each platform. Do not edit manually.                                  |
+| `.dart_tool/` and `.idea/` | Tool and IDE metadata | Maintain local analysis state and editor/project settings.                                                     |
 
-### 1. lib/
-This is the main folder where all Dart code is written.
+## Recommended `lib/` Modular Layout
 
-- `main.dart` → Entry point of the app.
-- Can contain subfolders:
-  - screens/ → UI screens
-  - widgets/ → Reusable components
-  - models/ → Data models
-  - services/ → API or Firebase logic
+```text
+lib/
+┣ main.dart
+┣ screens/
+┣ widgets/
+┣ services/
+┗ models/
+```
 
----
+## Visual Hierarchy (Simplified)
 
-### 2. android/
-Contains Android-specific configuration and build files.
-
-- `build.gradle` → Controls Android build configuration.
-- `AndroidManifest.xml` → Defines permissions and app metadata.
-
----
-
-### 3. ios/
-Contains iOS-specific configuration files.
-
-- `Info.plist` → Defines permissions and iOS metadata.
-
----
-
-### 4. test/
-Contains automated test files.
-
-- `widget_test.dart` → Default test file.
-
----
-
-### 5. pubspec.yaml
-Most important configuration file.
-
-Used to:
-- Add dependencies
-- Register assets
-- Manage fonts
-- Define environment settings
-
----
-
-### 6. build/
-Auto-generated folder containing compiled files.  
-Should not be modified manually.
-
----
-
-### 7. .dart_tool/
-Contains Dart and Flutter generated configurations.
-
----
-
-### 8. .gitignore
-Specifies which files Git should ignore.
-
----
-
-## Folder Hierarchy (Example)
-
-project_root/
-│
+```text
+S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/
 ├── lib/
-│ └── main.dart
+│   ├── main.dart
+│   ├── screens/
+│   ├── services/
+│   └── ...
 ├── android/
 ├── ios/
+├── assets/
+│   ├── images/
+│   └── fonts/
 ├── test/
 ├── pubspec.yaml
-└── README.md
+├── PROJECT_STRUCTURE.md
+└── Readme.md
+```
 
+## Assets Declaration Example
 
----
+```yaml
+flutter:
+  assets:
+    - assets/images/
+    - assets/fonts/
+```
 
 ## Reflection
 
-Understanding Flutter's folder structure helps in:
-
-- Writing organized and scalable code.
-- Separating UI, business logic, and data layers.
-- Improving collaboration in team environments.
-- Maintaining cross-platform compatibility for Android and iOS.
+- Understanding each folder helps developers navigate and debug faster.
+- A structured `lib/` layout improves readability and feature-level ownership.
+- Clear separation between app logic and native platform files improves maintainability.
+- Consistent structure improves teamwork, onboarding speed, and delivery quality.
