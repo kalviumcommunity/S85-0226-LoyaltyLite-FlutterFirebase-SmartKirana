@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WidgetTreeDemo extends StatefulWidget {
-  const WidgetTreeDemo({Key? key}) : super(key: key);
+  const WidgetTreeDemo({super.key});
 
   @override
   State<WidgetTreeDemo> createState() => _WidgetTreeDemoState();
@@ -74,7 +74,7 @@ class _WidgetTreeDemoState extends State<WidgetTreeDemo> {
   Widget _buildProfileCard() {
     return Card(
       elevation: 8,
-      shadowColor: Colors.deepPurple.withOpacity(0.3),
+      shadowColor: Colors.deepPurple.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -97,7 +97,7 @@ class _WidgetTreeDemoState extends State<WidgetTreeDemo> {
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.deepPurple.shade300,
-              child: Icon(
+              child: const Icon(
                 Icons.person,
                 size: 50,
                 color: Colors.white,
@@ -323,7 +323,7 @@ class _WidgetTreeDemoState extends State<WidgetTreeDemo> {
               ),
               value: _showCard,
               onChanged: _toggleCardVisibility,
-              activeColor: Colors.deepPurple,
+              activeThumbColor: Colors.deepPurple,
             ),
           ],
         ),
