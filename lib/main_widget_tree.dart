@@ -6,7 +6,7 @@ void main() {
 }
 
 class WidgetTreeApp extends StatelessWidget {
-  const WidgetTreeApp({Key? key}) : super(key: key);
+  const WidgetTreeApp({super.key});
 
   @override
   Widget build(BuildContext context) {

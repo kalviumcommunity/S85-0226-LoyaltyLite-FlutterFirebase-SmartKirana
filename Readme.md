@@ -1,59 +1,95 @@
-# Flutter Folder Structure Exploration (SmartKirana)
+# SmartKirana Flutter Assignment: Widget Tree & Reactive UI
 
-## Brief Description
+This assignment demo uses `lib/main_widget_tree.dart` to show Flutter widget hierarchy and real-time state-driven updates with `setState()`.
 
-This sprint explores and documents the default Flutter project structure and explains the role of each core folder and configuration file used for app development, platform builds, and maintainability.
+## Project Title
 
-## Summary
+**Widget Tree & Reactive UI Demo (SmartKirana)**
 
-- Detailed folder explanation is documented in [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
-- Core directories reviewed: `lib/`, `android/`, `ios/`, `assets/`, `test/`, and `build/`.
-- Supporting files reviewed: `.gitignore`, `.dart_tool/`, `.idea/`, and `pubspec.yaml`.
+## Short App Explanation
 
-## Screenshots of Folder Hierarchy
+The app demonstrates how Flutter builds UI as a nested widget tree and how interactions (button taps, switches, slider changes) trigger reactive UI rebuilds.
 
-> Replace these with your latest IDE hierarchy screenshots if needed.
+Run the assignment app:
 
-![Folder hierarchy screenshot 1](flutterrun2.png)
-![Folder hierarchy screenshot 2](flutterrun.png)
+```bash
+flutter run --target=lib/main_widget_tree.dart
+```
+
+## Widget Tree Diagram
+
+```text
+MaterialApp
+ ┗ WidgetTreeDemo (StatefulWidget)
+	 ┗ Scaffold
+		 ┣ AppBar
+		 ┃  ┣ Text (title)
+		 ┃  ┗ IconButton (theme toggle)
+		 ┗ Body (SingleChildScrollView)
+			 ┗ Column
+				 ┣ Profile Card
+				 ┃  ┣ CircleAvatar
+				 ┃  ┣ Text (user name)
+				 ┃  ┗ Row (stats)
+				 ┣ Counter Card
+				 ┃  ┣ Text (count)
+				 ┃  ┗ Row (decrement / reset / increment)
+				 ┣ Control Panel Card
+				 ┃  ┣ ElevatedButton (background color)
+				 ┃  ┣ Slider (font size)
+				 ┃  ┗ SwitchListTile (show/hide dynamic card)
+				 ┗ Dynamic Content Card (conditional)
+					 ┣ Text + Icon
+					 ┗ ElevatedButton (change name)
+```
+
+## Reactive UI State Updates
+
+State variables used in the demo:
+
+- `int _counter`
+- `Color _backgroundColor`
+- `bool _showCard`
+- `String _userName`
+- `double _fontSize`
+- `bool _isDarkMode`
+
+Example state update:
+
+```dart
+void _incrementCounter() {
+  setState(() {
+	 _counter++;
+  });
+}
+```
+
+Whenever state changes, Flutter rebuilds the relevant UI and reflects updates immediately.
+
+## Screenshots (Initial vs Updated State)
+
+Add your screenshots in `assets/images/` with these names:
+
+- `widget_tree_initial.png` (initial app state)
+- `widget_tree_updated.png` (after interaction)
+
+Screenshot placeholders:
+
+![Initial State](assets/images/widget_tree_initial.png)
+![Updated State](assets/images/widget_tree_updated.png)
 
 ## Reflection
 
-### Why is it important to understand each folder’s purpose?
+### How does the widget tree help Flutter manage complex UIs?
 
-Understanding folder responsibilities helps developers locate code quickly, avoid accidental edits in generated/platform areas, and maintain cleaner architecture as features grow.
+The widget tree structures UI into parent-child layers, making complex screens easier to compose, debug, and maintain. Each widget has a clear role and position in the hierarchy.
 
-### How does a well-organized structure improve teamwork and development speed?
+### Why is Flutter’s reactive model more efficient than manually updating views?
 
-A consistent structure enables parallel development, faster onboarding, easier reviews, and quicker debugging because everyone knows where to add or find specific logic.
+In Flutter, developers update state once and Flutter computes minimal UI changes automatically. This avoids manual view lookup and redraw logic, reduces bugs, and improves performance.
 
-## Submission Guidelines
+## Assignment Files
 
-### Commit Message
-
-```bash
-docs: added Flutter project structure explanation and folder overview
-```
-
-### Pull Request Title
-
-```text
-[Sprint-2] Flutter Folder Structure Exploration – TeamName
-```
-
-### PR Description Template
-
-```markdown
-## Summary of Exploration
-
-- Reviewed Flutter core folders and supporting files.
-- Documented folder responsibilities and structure decisions.
-
-## Screenshot
-
-- Added IDE folder hierarchy screenshot(s).
-
-## Documentation Link
-
-- See PROJECT_STRUCTURE.md for full folder-by-folder explanation.
-```
+- `lib/main_widget_tree.dart`
+- `lib/screens/widget_tree_demo.dart`
+- `README.md`
