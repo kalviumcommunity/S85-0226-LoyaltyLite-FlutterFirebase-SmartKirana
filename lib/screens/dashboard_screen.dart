@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
+import 'scrollable_views.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.user});
@@ -94,6 +95,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Welcome, ${widget.user.email ?? 'User'}'),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ScrollableViews(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.view_module_outlined),
+              label: const Text('Open Scrollable Views Demo'),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
