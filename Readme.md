@@ -1,95 +1,121 @@
-# SmartKirana Flutter Assignment: Widget Tree & Reactive UI
+# SmartKirana Flutter Assignment: User Input Form & Validation
 
-This assignment demo uses `lib/main_widget_tree.dart` to show Flutter widget hierarchy and real-time state-driven updates with `setState()`.
+This assignment demonstrates Flutter input widgets and form validation using `TextField`, `ElevatedButton`, `Form`, and `TextFormField`.
 
 ## Project Title
 
-**Widget Tree & Reactive UI Demo (SmartKirana)**
+**User Input Form Demo (SmartKirana)**
 
-## Short App Explanation
+## Short Description
 
-The app demonstrates how Flutter builds UI as a nested widget tree and how interactions (button taps, switches, slider changes) trigger reactive UI rebuilds.
+Implemented a functional user input form in `lib/screens/user_input_form.dart` with:
 
-Run the assignment app:
+- Name and Email input fields
+- Validation rules for empty and invalid values
+- Submit button action
+- Success feedback via `SnackBar`
 
-```bash
-flutter run --target=lib/main_widget_tree.dart
-```
+The screen is integrated into the app from `DashboardScreen` with a button: **Open User Input Form Demo**.
 
-## Widget Tree Diagram
+## Core Input Widgets Used
 
-```text
-MaterialApp
- ┗ WidgetTreeDemo (StatefulWidget)
-	 ┗ Scaffold
-		 ┣ AppBar
-		 ┃  ┣ Text (title)
-		 ┃  ┗ IconButton (theme toggle)
-		 ┗ Body (SingleChildScrollView)
-			 ┗ Column
-				 ┣ Profile Card
-				 ┃  ┣ CircleAvatar
-				 ┃  ┣ Text (user name)
-				 ┃  ┗ Row (stats)
-				 ┣ Counter Card
-				 ┃  ┣ Text (count)
-				 ┃  ┗ Row (decrement / reset / increment)
-				 ┣ Control Panel Card
-				 ┃  ┣ ElevatedButton (background color)
-				 ┃  ┣ Slider (font size)
-				 ┃  ┗ SwitchListTile (show/hide dynamic card)
-				 ┗ Dynamic Content Card (conditional)
-					 ┣ Text + Icon
-					 ┗ ElevatedButton (change name)
-```
-
-## Reactive UI State Updates
-
-State variables used in the demo:
-
-- `int _counter`
-- `Color _backgroundColor`
-- `bool _showCard`
-- `String _userName`
-- `double _fontSize`
-- `bool _isDarkMode`
-
-Example state update:
+### TextField (Basic Input Example)
 
 ```dart
-void _incrementCounter() {
-  setState(() {
-	 _counter++;
-  });
+TextField(
+	decoration: InputDecoration(
+		labelText: 'Enter your name',
+		border: OutlineInputBorder(),
+	),
+)
+```
+
+### TextFormField (Name)
+
+```dart
+TextFormField(
+	controller: _nameController,
+	decoration: const InputDecoration(
+		labelText: 'Name',
+		hintText: 'Enter your name',
+		border: OutlineInputBorder(),
+	),
+	validator: (value) =>
+			value == null || value.trim().isEmpty ? 'Enter your name' : null,
+)
+```
+
+### TextFormField (Email + Validation)
+
+```dart
+TextFormField(
+	controller: _emailController,
+	keyboardType: TextInputType.emailAddress,
+	decoration: const InputDecoration(
+		labelText: 'Email',
+		hintText: 'Enter your email',
+		border: OutlineInputBorder(),
+	),
+	validator: (value) {
+		final email = value?.trim() ?? '';
+		if (email.isEmpty) return 'Enter your email';
+		if (!email.contains('@')) return 'Enter a valid email';
+		return null;
+	},
+)
+```
+
+### ElevatedButton (Submit)
+
+```dart
+ElevatedButton(
+	onPressed: _submitForm,
+	child: const Text('Submit'),
+)
+```
+
+### Form + Feedback Logic
+
+```dart
+void _submitForm() {
+	if (_formKey.currentState!.validate()) {
+		ScaffoldMessenger.of(context).showSnackBar(
+			SnackBar(
+				content: Text('Form submitted successfully for ${_nameController.text.trim()}!'),
+			),
+		);
+	}
 }
 ```
 
-Whenever state changes, Flutter rebuilds the relevant UI and reflects updates immediately.
+## Screenshots (Before and After Validation)
 
-## Screenshots (Initial vs Updated State)
+Add screenshots in `assets/images/` with these names:
 
-Add your screenshots in `assets/images/` with these names:
-
-- `widget_tree_initial.png` (initial app state)
-- `widget_tree_updated.png` (after interaction)
+- `user_form_empty_validation.png` (empty field errors visible)
+- `user_form_success_snackbar.png` (successful submit with snackbar)
 
 Screenshot placeholders:
 
-![Initial State](assets/images/widget_tree_initial.png)
-![Updated State](assets/images/widget_tree_updated.png)
+![Empty Field Validation](assets/images/user_form_empty_validation.png)
+![Successful Submit Snackbar](assets/images/user_form_success_snackbar.png)
 
 ## Reflection
 
-### How does the widget tree help Flutter manage complex UIs?
+### What are the benefits of input validation in mobile apps?
 
-The widget tree structures UI into parent-child layers, making complex screens easier to compose, debug, and maintain. Each widget has a clear role and position in the hierarchy.
+Input validation prevents bad data from being submitted, reduces backend errors, and guides users to correct mistakes immediately.
 
-### Why is Flutter’s reactive model more efficient than manually updating views?
+### How does FormState simplify input handling?
 
-In Flutter, developers update state once and Flutter computes minimal UI changes automatically. This avoids manual view lookup and redraw logic, reduces bugs, and improves performance.
+`FormState` centralizes validation and submit flow so multiple input fields can be checked together with one `validate()` call.
+
+### What user experience improvements can be made through feedback widgets like SnackBar?
+
+Feedback widgets provide immediate confirmation or guidance, improve user confidence, and make app interactions clearer without navigating away from the current screen.
 
 ## Assignment Files
 
-- `lib/main_widget_tree.dart`
-- `lib/screens/widget_tree_demo.dart`
-- `README.md`
+- `lib/screens/user_input_form.dart`
+- `lib/screens/dashboard_screen.dart`
+- `Readme.md`
