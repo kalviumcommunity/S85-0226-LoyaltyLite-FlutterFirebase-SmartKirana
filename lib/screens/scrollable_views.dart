@@ -262,7 +262,7 @@ class ScrollableViews extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final icons = [
-                  Icons.snack_bar_rounded,
+                  Icons.info_rounded,
                   Icons.local_drink_rounded,
                   Icons.icecream_rounded,
                   Icons.bakery_dining_rounded,
