@@ -16,19 +16,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       'title': 'Welcome to LoyalBazaar',
       'description': 'Transform your small business with digital loyalty programs',
-      'image': 'onboarding_1.png',
+      'image': 'assets/images/onboarding_banner.png',
       'button': 'Get Started',
     },
     {
       'title': 'Easy Customer Management',
       'description': 'Add customers with just their mobile number',
-      'image': 'onboarding_2.png',
+      'image': 'assets/images/onboarding_banner.png',
       'button': 'Next',
     },
     {
       'title': 'Reward Your Customers',
       'description': 'Create points, rewards, and special offers',
-      'image': 'onboarding_3.png',
+      'image': 'assets/images/onboarding_banner.png',
       'button': 'Start Free Trial',
     },
   ];
@@ -36,7 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -134,22 +134,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Image placeholder
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.storefront,
-              size: 80,
-              color: Colors.orange,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              pageData['image']!,
+              width: 320,
+              height: 200,
+              fit: BoxFit.cover,
             ),
           ),
-          
-          const SizedBox(height: 30),
+
+          const SizedBox(height: 24),
+
+          Image.asset(
+            'assets/images/app_logo.png',
+            width: 72,
+            height: 72,
+          ),
+
+          const SizedBox(height: 14),
+
+          const SizedBox(height: 24),
           
           // Title
           Text(

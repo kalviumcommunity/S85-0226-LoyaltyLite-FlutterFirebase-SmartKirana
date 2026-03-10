@@ -460,7 +460,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               setState(() {
-                _userPoints -= reward['points'];
+                _userPoints -= (reward['points'] as num).toInt();
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

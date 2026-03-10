@@ -1,16 +1,25 @@
 name: loyalbazaar
 description: A professional mobile application for small businesses in Tier-2 and Tier-3 towns in India to manage customer loyalty programs easily and affordably.
 
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  firebase_core: ^3.13.1
+  firebase_auth: ^5.5.4
+  cloud_firestore: ^5.6.8
+  firebase_storage: ^12.4.6
+  google_fonts: ^6.2.1
+  fl_chart: ^0.68.0
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -21,4 +30,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/icons/
     - assets/fonts/
