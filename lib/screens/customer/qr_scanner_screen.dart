@@ -216,13 +216,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                             
                             // Scanner line animation
                             if (_isScanning)
-                              const Center(
+                              Center(
                                 child: SizedBox(
                                   width: 200,
                                   height: 2,
                                   child: LinearProgressIndicator(
                                     backgroundColor: Colors.transparent,
-                                    valueColor: Colors.orange,
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
+                                      Colors.orange,
+                                    ),
                                   ),
                                 ),
                               ),

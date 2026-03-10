@@ -370,11 +370,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           itemCount: 5,
           itemBuilder: (context, index) {
             final products = [
-              {'name': 'Tea', 'sales': 234, 'revenue': '₹2,340'},
-              {'name': 'Snacks', 'sales': 189, 'revenue': '₹3,780'},
-              {'name': 'Beverages', 'sales': 156, 'revenue': '₹2,340'},
-              {'name': 'Groceries', 'sales': 98, 'revenue': '₹4,900'},
-              {'name': 'Stationery', 'sales': 67, 'revenue': '₹1,340'},
+              {'name': 'Tea', 'sales': '234', 'revenue': '₹2,340'},
+              {'name': 'Snacks', 'sales': '189', 'revenue': '₹3,780'},
+              {'name': 'Beverages', 'sales': '156', 'revenue': '₹2,340'},
+              {'name': 'Groceries', 'sales': '98', 'revenue': '₹4,900'},
+              {'name': 'Stationery', 'sales': '67', 'revenue': '₹1,340'},
             ];
             
             final product = products[index];

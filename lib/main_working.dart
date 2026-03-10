@@ -51,7 +51,7 @@ class WorkingDashboard extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

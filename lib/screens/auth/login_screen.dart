@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/auth_service.dart';
+import '../../services/database_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -80,23 +81,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: DropdownButtonHideUnderline(
-                  value: _selectedUserType,
-                  isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'shop_owner',
-                      child: Text('Shop Owner'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'customer',
-                      child: Text('Customer'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUserType = value!;
-                    });
-                  },
+                  child: DropdownButton<String>(
+                    value: _selectedUserType,
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'shop_owner',
+                        child: Text('Shop Owner'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'customer',
+                        child: Text('Customer'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        _selectedUserType = value;
+                      });
+                    },
+                  ),
                 ),
               ),
               
@@ -193,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: Colors.white,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
                             : Text(

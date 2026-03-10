@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/database_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -85,23 +86,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: DropdownButtonHideUnderline(
-                  value: _selectedUserType,
-                  isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'shop_owner',
-                      child: Text('Shop Owner'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'customer',
-                      child: Text('Customer'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUserType = value!;
-                    });
-                  },
+                  child: DropdownButton<String>(
+                    value: _selectedUserType,
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'shop_owner',
+                        child: Text('Shop Owner'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'customer',
+                        child: Text('Customer'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        _selectedUserType = value;
+                      });
+                    },
+                  ),
                 ),
               ),
               
@@ -338,7 +342,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: Colors.white,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
                             : Text(

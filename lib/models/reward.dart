@@ -22,7 +22,7 @@ class Reward {
     this.isActive = true,
     this.validUntil,
     this.maxQuantity,
-    this.currentQuantity,
+    this.currentQuantity = 0,
   });
 
   factory Reward.fromMap(Map<String, dynamic> map) {

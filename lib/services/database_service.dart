@@ -28,7 +28,7 @@ class DatabaseService {
   static Future<Map<String, dynamic>> _makeAuthenticatedRequest(
     String endpoint,
     String method,
-    Map<String, dynamic>? body,
+    [Map<String, dynamic>? body],
   ) async {
     final token = await getToken();
     if (token == null) {
@@ -90,12 +90,12 @@ class DatabaseService {
   }
 
   static Future<Map<String, dynamic>> updateShopOwnerProfile(Map<String, dynamic> data) async {
-    return await _makeAuthenticatedRequest('/shop-owner/profile', 'PUT', body: data);
+    return await _makeAuthenticatedRequest('/shop-owner/profile', 'PUT', data);
   }
 
   // Customer Operations
   static Future<Map<String, dynamic>> addCustomer(Map<String, dynamic> customerData) async {
-    return await _makeAuthenticatedRequest('/customers', 'POST', body: customerData);
+    return await _makeAuthenticatedRequest('/customers', 'POST', customerData);
   }
 
   static Future<Map<String, dynamic>> getCustomers({int page = 1, int limit = 20}) async {
@@ -107,7 +107,7 @@ class DatabaseService {
   }
 
   static Future<Map<String, dynamic>> updateCustomer(String customerId, Map<String, dynamic> data) async {
-    return await _makeAuthenticatedRequest('/customers/$customerId', 'PUT', body: data);
+    return await _makeAuthenticatedRequest('/customers/$customerId', 'PUT', data);
   }
 
   static Future<Map<String, dynamic>> deleteCustomer(String customerId) async {
@@ -116,7 +116,7 @@ class DatabaseService {
 
   // Transaction Operations
   static Future<Map<String, dynamic>> addTransaction(Map<String, dynamic> transactionData) async {
-    return await _makeAuthenticatedRequest('/transactions', 'POST', body: transactionData);
+    return await _makeAuthenticatedRequest('/transactions', 'POST', transactionData);
   }
 
   static Future<Map<String, dynamic>> getTransactions({String? customerId, int page = 1, int limit = 20}) async {
@@ -129,7 +129,7 @@ class DatabaseService {
 
   // Reward Operations
   static Future<Map<String, dynamic>> addReward(Map<String, dynamic> rewardData) async {
-    return await _makeAuthenticatedRequest('/rewards', 'POST', body: rewardData);
+    return await _makeAuthenticatedRequest('/rewards', 'POST', rewardData);
   }
 
   static Future<Map<String, dynamic>> getRewards({String? shopId, int page = 1, int limit = 20}) async {
@@ -141,7 +141,7 @@ class DatabaseService {
   }
 
   static Future<Map<String, dynamic>> updateReward(String rewardId, Map<String, dynamic> data) async {
-    return await _makeAuthenticatedRequest('/rewards/$rewardId', 'PUT', body: data);
+    return await _makeAuthenticatedRequest('/rewards/$rewardId', 'PUT', data);
   }
 
   static Future<Map<String, dynamic>> deleteReward(String rewardId) async {
@@ -159,7 +159,7 @@ class DatabaseService {
 
   // QR Code Operations
   static Future<Map<String, dynamic>> checkInCustomer(String qrData) async {
-    return await _makeAuthenticatedRequest('/check-in', 'POST', body: {
+    return await _makeAuthenticatedRequest('/check-in', 'POST', {
       'qrData': qrData,
       'timestamp': DateTime.now().toIso8601String(),
     });
@@ -177,7 +177,7 @@ class DatabaseService {
     required String type, // 'whatsapp', 'sms'
     String? phoneNumber,
   }) async {
-    return await _makeAuthenticatedRequest('/notifications/send', 'POST', body: {
+    return await _makeAuthenticatedRequest('/notifications/send', 'POST', {
       'customerId': customerId,
       'message': message,
       'type': type,
