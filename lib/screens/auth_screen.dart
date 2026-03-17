@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+ 
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
+  @override
+  State<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+ 
 import '../services/auth_service.dart';
 import 'auth_test_screen.dart';
 
@@ -14,7 +27,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _authService = AuthService();
-  
+   
   bool isLogin = true;
   bool _isLoading = false;
 
@@ -33,6 +46,23 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
+       if (isLogin) {
+        // Login logic
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+      } else {
+        // Sign Up logic
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Authentication Error';
+      
+ 
       User? user;
       
       if (isLogin) {
@@ -72,7 +102,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _isLoading = false);
       
       String errorMessage = 'Authentication Error';
-      if (e.code == 'weak-password') {
+       if (e.code == 'weak-password') {
         errorMessage = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
         errorMessage = 'An account already exists for this email.';
@@ -83,6 +113,29 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (e.code == 'invalid-email') {
         errorMessage = 'The email address is not valid.';
       }
+ 
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+ 
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -100,6 +153,7 @@ class _AuthScreenState extends State<AuthScreen> {
           backgroundColor: Colors.red,
         ),
       );
+ 
     }
   }
 
@@ -107,6 +161,8 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+         title: Text(isLogin ? 'Login' : 'Sign Up'),
+ 
         title: Text('Firebase Auth Demo'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
@@ -140,8 +196,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
+                           isLogin ? Icons.login : Icons.person_add,
+ 
                           Icons.account_circle,
-                          size: 80,
+                           size: 80,
                           color: Colors.deepPurple,
                         ),
                         const SizedBox(height: 16),
@@ -275,7 +333,28 @@ class _AuthScreenState extends State<AuthScreen> {
                         if (!isLogin)
                           Column(
                             children: [
-                              const Divider(),
+                             const Divider(),
+                            const SizedBox(height: 10),
+                            Text(
+                              'By signing up, you agree to our terms and conditions',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+                               const Divider(),
                               const SizedBox(height: 10),
                               Text(
                                 'By signing up, you agree to our terms and conditions',
@@ -306,6 +385,6 @@ class _AuthScreenState extends State<AuthScreen> {
         child: const Icon(Icons.bug_report, color: Colors.white),
         tooltip: 'Test Authentication',
       ),
-    );
+     );
   }
 }
