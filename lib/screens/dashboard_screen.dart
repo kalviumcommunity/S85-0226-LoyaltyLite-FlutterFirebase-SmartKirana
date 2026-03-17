@@ -5,18 +5,48 @@ import '../services/auth_service.dart';
 import 'asset_demo_screen.dart';
 import 'auth_test_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   DashboardScreen({super.key, required this.user});
 
   final User user;
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
   final AuthService _authService = AuthService();
+  bool _isSigningOut = false;
 
   Future<void> _logout(BuildContext context) async {
-    await _authService.logout();
-    if (context.mounted) {
+    if (_isSigningOut) {
+      return;
+    }
+
+    setState(() => _isSigningOut = true);
+
+    try {
+      await _authService.logout();
+    } on FirebaseAuthException catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out successfully.')),
+        SnackBar(content: Text('Logout failed: ${error.message ?? error.code}')),
       );
+    } catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logout failed. Please try again.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
     }
   }
 
@@ -29,9 +59,18 @@ class DashboardScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
+            onPressed: _isSigningOut ? null : () => _logout(context),
+            icon: _isSigningOut
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.logout),
+            tooltip: _isSigningOut ? 'Signing out...' : 'Logout',
           ),
         ],
       ),
@@ -81,7 +120,7 @@ class DashboardScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              user.email ?? 'Shop Owner',
+                              widget.user.email ?? 'Shop Owner',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -89,13 +128,34 @@ class DashboardScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'UID: ${user.uid.substring(0, 8)}...',
+                              'UID: ${widget.user.uid.substring(0, 8)}...',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade500,
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                elevation: 2,
+                color: Colors.deepPurple.shade50,
+                child: const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.verified_user, color: Colors.deepPurple),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Your Firebase session is active on this device. Restarting the app keeps you signed in until you use Logout.',
+                          style: TextStyle(height: 1.4),
                         ),
                       ),
                     ],
