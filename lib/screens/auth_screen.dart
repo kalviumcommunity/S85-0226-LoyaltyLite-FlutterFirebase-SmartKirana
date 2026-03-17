@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+ 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -12,7 +12,22 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+ 
+import '../services/auth_service.dart';
+import 'auth_test_screen.dart';
+
+class AuthScreen extends StatefulWidget {
+  @override
+  _AuthScreenState createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _authService = AuthService();
+   
   bool isLogin = true;
   bool _isLoading = false;
 
@@ -31,7 +46,7 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      if (isLogin) {
+       if (isLogin) {
         // Login logic
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
@@ -47,7 +62,47 @@ class _AuthScreenState extends State<AuthScreen> {
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Authentication Error';
       
-      if (e.code == 'weak-password') {
+ 
+      User? user;
+      
+      if (isLogin) {
+        user = await _authService.login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      } else {
+        user = await _authService.signUp(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      }
+
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isLogin ? 'Login Successful!' : 'Signup Successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Authentication failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      
+      setState(() => _isLoading = false);
+      
+      String errorMessage = 'Authentication Error';
+       if (e.code == 'weak-password') {
         errorMessage = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
         errorMessage = 'An account already exists for this email.';
@@ -58,7 +113,7 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (e.code == 'invalid-email') {
         errorMessage = 'The email address is not valid.';
       }
-
+ 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -80,6 +135,25 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+ 
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+ 
     }
   }
 
@@ -87,7 +161,9 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isLogin ? 'Login' : 'Sign Up'),
+         title: Text(isLogin ? 'Login' : 'Sign Up'),
+ 
+        title: Text('Firebase Auth Demo'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -120,8 +196,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isLogin ? Icons.login : Icons.person_add,
-                          size: 80,
+                           isLogin ? Icons.login : Icons.person_add,
+ 
+                          Icons.account_circle,
+                           size: 80,
                           color: Colors.deepPurple,
                         ),
                         const SizedBox(height: 16),
@@ -255,7 +333,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         if (!isLogin)
                           Column(
                             children: [
-                            const Divider(),
+                             const Divider(),
                             const SizedBox(height: 10),
                             Text(
                               'By signing up, you agree to our terms and conditions',
@@ -276,6 +354,37 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
       ),
-    );
+                               const Divider(),
+                              const SizedBox(height: 10),
+                              Text(
+                                'By signing up, you agree to our terms and conditions',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => AuthTestScreen()),
+          );
+        },
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.bug_report, color: Colors.white),
+        tooltip: 'Test Authentication',
+      ),
+     );
   }
 }

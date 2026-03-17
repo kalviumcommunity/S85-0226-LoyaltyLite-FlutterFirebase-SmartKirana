@@ -20,28 +20,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_ANDROID_API_KEY',
-    appId: 'REPLACE_WITH_ANDROID_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_ANDROID_SENDER_ID',
-    projectId: 'REPLACE_WITH_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_STORAGE_BUCKET',
+    apiKey: 'AIzaSyDemoKeyForTestingOnly-ReplaceWithRealKey',
+    appId: '1:123456789:android:abcdef123456',
+    messagingSenderId: '123456789',
+    projectId: 'smart-kirana-demo',
+    storageBucket: 'smart-kirana-demo.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_IOS_API_KEY',
-    appId: 'REPLACE_WITH_IOS_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_IOS_SENDER_ID',
-    projectId: 'REPLACE_WITH_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_STORAGE_BUCKET',
-    iosBundleId: 'com.example.schoolEventPlanner',
+    apiKey: 'AIzaSyDemoKeyForTestingOnly-ReplaceWithRealKey',
+    appId: '1:123456789:ios:abcdef123456',
+    messagingSenderId: '123456789',
+    projectId: 'smart-kirana-demo',
+    storageBucket: 'smart-kirana-demo.appspot.com',
+    iosBundleId: 'com.example.smartkirana',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_WEB_API_KEY',
-    appId: 'REPLACE_WITH_WEB_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_WEB_SENDER_ID',
-    projectId: 'REPLACE_WITH_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_STORAGE_BUCKET',
-    authDomain: 'REPLACE_WITH_AUTH_DOMAIN',
+    apiKey: 'AIzaSyDemoKeyForTestingOnly-ReplaceWithRealKey',
+    appId: '1:123456789:web:abcdef123456',
+    messagingSenderId: '123456789',
+    projectId: 'smart-kirana-demo',
+    storageBucket: 'smart-kirana-demo.appspot.com',
+    authDomain: 'smart-kirana-demo.firebaseapp.com',
   );
 }

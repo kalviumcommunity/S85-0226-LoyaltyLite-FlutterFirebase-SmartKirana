@@ -16,7 +16,7 @@ class ScrollableDemoApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,
-        useMaterial3: true,
+        useMaterial3: true,  
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
