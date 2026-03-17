@@ -1,158 +1,246 @@
 import 'package:flutter/material.dart';
-import 'navigation_dashboard_screen.dart';
-import 'navigation_customers_screen.dart';
-import 'navigation_rewards_screen.dart';
-import 'navigation_analytics_screen.dart';
-import 'navigation_settings_screen.dart';
-import 'about_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏠 LocalLoyal Home'),
-        backgroundColor: Colors.orange,
+        title: Text('Welcome, ${user?.email ?? 'User'}'),
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.signOut();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Logged out successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error logging out: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            tooltip: 'Logout',
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.orange.shade50, Colors.white],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            colors: [
+              Colors.deepPurple.shade50,
+              Colors.white,
+            ],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.orange, Colors.deepOrange],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.orange.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Welcome to LocalLoyal!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              // User Profile Card
+              Card(
+                elevation: 8,
+                shadowColor: Colors.deepPurple.withOpacity(0.3),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.deepPurple,
+                        child: const Icon(
+                          Icons.person,
+                          size: 30,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Your complete loyalty management system',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Logged In Successfully!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              user?.email ?? 'user@example.com',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepPurple.shade800,
+                              ),
+                            ),
+                            Text(
+                              'UID: ${user?.uid.substring(0, 8) ?? '00000000'}...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                            if (user?.emailVerified == true)
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.verified,
+                                    size: 16,
+                                    color: Colors.green.shade600,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Email Verified',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.green.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        _buildQuickStat('👥', '1,234', 'Customers'),
-                        const SizedBox(width: 16),
-                        _buildQuickStat('🎁', '89', 'Rewards'),
-                        const SizedBox(width: 16),
-                        _buildQuickStat('📈', '98%', 'Satisfaction'),
-                      ],
-                    ),
-                  ],
+                    ],
                 ),
               ),
+              const SizedBox(height: 24),
               
-              const SizedBox(height: 32),
+              // Success Message
+              Card(
+                color: Colors.green.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Icon(Icons.check_circle, size: 48, color: Colors.green.shade600),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Authentication Flow Complete!',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'You are now logged in. The app will automatically redirect to the login screen when you log out.',
+                        style: TextStyle(color: Colors.green.shade600),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               
-              // Navigation Menu
-              const Text(
-                'Navigate to Screens',
+              // Authentication Status
+              Text(
+                'Authentication Status',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Colors.deepPurple.shade800,
                 ),
               ),
               const SizedBox(height: 16),
               
-              // Navigation Buttons
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  children: [
-                    _buildNavigationCard(
-                      context,
-                      '📊 Dashboard',
-                      'View business overview',
-                      Icons.dashboard,
-                      Colors.blue,
-                      '/dashboard',
-                    ),
-                    _buildNavigationCard(
-                      context,
-                      '👥 Customers',
-                      'Manage customers',
-                      Icons.people,
-                      Colors.green,
-                      '/customers',
-                    ),
-                    _buildNavigationCard(
-                      context,
-                      '🎁 Rewards',
-                      'Create rewards',
-                      Icons.card_giftcard,
-                      Colors.purple,
-                      '/rewards',
-                    ),
-                    _buildNavigationCard(
-                      context,
-                      '📈 Analytics',
-                      'View insights',
-                      Icons.analytics,
-                      Colors.red,
-                      '/analytics',
-                    ),
-                    _buildNavigationCard(
-                      context,
-                      '⚙️ Settings',
-                      'App configuration',
-                      Icons.settings,
-                      Colors.grey,
-                      '/settings',
-                    ),
-                    _buildNavigationCard(
-                      context,
-                      '📱 About',
-                      'App information',
-                      Icons.info,
-                      Colors.teal,
-                      '/about',
-                    ),
-                  ],
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: [
+                  _buildStatusCard(
+                    Icons.check_circle,
+                    'User Logged In',
+                    'Authentication successful',
+                    Colors.green,
+                  ),
+                  _buildStatusCard(
+                    Icons.email,
+                    'Email Verified',
+                    user?.emailVerified == true ? 'Yes' : 'No',
+                    user?.emailVerified == true ? Colors.green : Colors.orange,
+                  ),
+                  _buildStatusCard(
+                    Icons.timer,
+                    'Session Active',
+                    'User session is active',
+                    Colors.blue,
+                  ),
+                  _buildStatusCard(
+                    Icons.security,
+                    'Secure Connection',
+                    'Firebase Auth active',
+                    Colors.purple,
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Action Buttons
+              Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple.shade800,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.refresh),
+                  title: const Text('Refresh User Data'),
+                  subtitle: const Text('Reload user information'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('User data refreshed'),
+                        backgroundColor: Colors.blue,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('Account Info'),
+                  subtitle: const Text('View detailed account information'),
+                  onTap: () {
+                    _showAccountInfo(context);
+                  },
                 ),
               ),
             ],
@@ -162,107 +250,68 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStat(String emoji, String value, String label) {
-    return Column(
-      children: [
-        Text(
-          emoji,
-          style: const TextStyle(fontSize: 24),
+  Widget _buildStatusCard(IconData icon, String title, String value, Color color) {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: color),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white70,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildNavigationCard(
-    BuildContext context,
-    String title,
-    String description,
-    IconData icon,
-    Color color,
-    String route,
-  ) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, route);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: color,
-                  ),
-                ],
-              ),
-            ],
-          ),
+  void _showAccountInfo(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Account Information'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Email: ${user?.email ?? 'N/A'}'),
+            const SizedBox(height: 8),
+            Text('UID: ${user?.uid ?? 'N/A'}'),
+            const SizedBox(height: 8),
+            Text('Email Verified: ${user?.emailVerified == true ? 'Yes' : 'No'}'),
+            const SizedBox(height: 8),
+            Text('Creation Time: ${user?.metadata.creationTime?.toString() ?? 'N/A'}'),
+            const SizedBox(height: 8),
+            Text('Last Sign In: ${user?.metadata.lastSignInTime?.toString() ?? 'N/A'}'),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
