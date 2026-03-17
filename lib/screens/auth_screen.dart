@@ -4,12 +4,13 @@ import '../services/auth_service.dart';
 import 'auth_test_screen.dart';
 
 class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -82,6 +83,10 @@ class _AuthScreenState extends State<AuthScreen> {
         errorMessage = 'Wrong password provided.';
       } else if (e.code == 'invalid-email') {
         errorMessage = 'The email address is not valid.';
+      } else if (e.code == 'invalid-credential') {
+        errorMessage = 'The email or password is incorrect.';
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = 'Too many attempts. Please wait and try again.';
       }
       
       ScaffoldMessenger.of(context).showSnackBar(

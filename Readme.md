@@ -119,3 +119,39 @@ Feedback widgets provide immediate confirmation or guidance, improve user confid
 - `lib/screens/user_input_form.dart`
 - `lib/screens/dashboard_screen.dart`
 - `Readme.md`
+
+## Firebase Persistent Login Flow
+
+SmartKirana now uses Firebase Authentication session persistence at the app root in `lib/main.dart`.
+
+### Implemented Behavior
+
+- The app listens globally with `FirebaseAuth.instance.authStateChanges()` inside `AuthGate`
+- A loading screen is shown while Firebase checks the cached session
+- Signed-in users are routed directly to `DashboardScreen`
+- Signed-out users are routed to `AuthScreen`
+- Logout uses `FirebaseAuth.instance.signOut()` through `AuthService.logout()`
+- No `SharedPreferences` or manual local session storage is used
+
+### Auto-Login Verification Cases
+
+1. Login with a valid Firebase email and password.
+2. Confirm the app opens `DashboardScreen`.
+3. Fully close the app.
+4. Reopen the app.
+5. Expected result: the app skips the login screen and opens `DashboardScreen` directly.
+
+### Logout Verification Cases
+
+1. While signed in, tap the logout button in the dashboard app bar.
+2. Expected result: the app returns to `AuthScreen` immediately.
+3. Fully close the app after logout.
+4. Reopen the app.
+5. Expected result: the app stays on `AuthScreen`; auto-login does not trigger.
+
+### Session State Expectations
+
+- Logged-in state persists after app restart
+- Logged-out state persists after app restart
+- Login and logout changes are reflected immediately because the root widget listens to Firebase auth state changes
+- The loading screen prevents incorrect routing while the session is being restored
