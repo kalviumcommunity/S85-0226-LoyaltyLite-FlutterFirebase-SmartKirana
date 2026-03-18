@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ResponsiveHome extends StatefulWidget {
   const ResponsiveHome({Key? key}) : super(key: key);
@@ -9,6 +11,13 @@ class ResponsiveHome extends StatefulWidget {
 
 class _ResponsiveHomeState extends State<ResponsiveHome> {
   int _selectedEventIndex = 0;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _tasksStream;
+  late final Future<QuerySnapshot<Map<String, dynamic>>> _tasksOnceFuture;
+  Future<DocumentSnapshot<Map<String, dynamic>>>? _userFuture;
+  String? _currentUserUid;
 
   final List<Map<String, String>> _eventCategories = [
     {
@@ -48,6 +57,17 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
       'color': 'indigo'
     }
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tasksStream = _firestore.collection('tasks').snapshots();
+    _tasksOnceFuture = _firestore.collection('tasks').get();
+    _currentUserUid = _auth.currentUser?.uid;
+    if (_currentUserUid != null) {
+      _userFuture = _firestore.collection('users').doc(_currentUserUid).get();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,6 +240,11 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
             ),
           ),
           const SizedBox(height: 16),
+          SizedBox(
+            height: 240,
+            child: _buildFirestoreSection(isCompact: true),
+          ),
+          const SizedBox(height: 12),
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -253,6 +278,11 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
             ),
           ),
           const SizedBox(height: 12),
+          SizedBox(
+            height: 220,
+            child: _buildFirestoreSection(isCompact: true),
+          ),
+          const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
               itemCount: _eventCategories.length,
@@ -381,38 +411,403 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [cardColor.withOpacity(0.1), cardColor.withOpacity(0.05)],
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.event_available,
-                    size: 64,
-                    color: cardColor.withOpacity(0.7),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Event Ideas Coming Soon',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.deepPurple.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _buildFirestoreSection(isCompact: false),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildFirestoreSection({required bool isCompact}) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isCompact ? 12 : 16),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.deepPurple.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Live Firestore Tasks',
+            style: TextStyle(
+              fontSize: isCompact ? 15 : 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple.shade700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildTasksSummary(),
+          const SizedBox(height: 6),
+          _buildUserSummary(),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: _showAddTaskDialog,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Task'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  textStyle: const TextStyle(fontSize: 12),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Edit/Delete from list',
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: _buildLiveTasksList(maxItems: isCompact ? 3 : null),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTasksSummary() {
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _tasksOnceFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text(
+            'Loading task count...',
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Text(
+            'Task count unavailable',
+            style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+          );
+        }
+
+        final count = snapshot.data?.docs.length ?? 0;
+        return Text(
+          'One-time read: $count task(s) found',
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+        );
+      },
+    );
+  }
+
+  Widget _buildUserSummary() {
+    if (_currentUserUid == null || _userFuture == null) {
+      return Text(
+        'Single-doc read: no signed-in user',
+        style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+      );
+    }
+
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future: _userFuture!,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text(
+            'Loading user profile...',
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Text(
+            'User read failed',
+            style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+          );
+        }
+
+        final doc = snapshot.data;
+        if (doc == null || !doc.exists) {
+          return Text(
+            'Single-doc read: user not found',
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+          );
+        }
+
+        final userData = doc.data() ?? <String, dynamic>{};
+        final userName = _safeString(userData['name'], fallback: 'No name');
+        return Text(
+          'Single-doc read: $userName (${_currentUserUid!.substring(0, _currentUserUid!.length > 8 ? 8 : _currentUserUid!.length)}...)',
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+        );
+      },
+    );
+  }
+
+  Widget _buildLiveTasksList({int? maxItems}) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _tasksStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Could not load tasks',
+              style: TextStyle(color: Colors.red.shade700),
+            ),
+          );
+        }
+
+        final allDocs = snapshot.data?.docs ?? [];
+        final docs = maxItems == null ? allDocs : allDocs.take(maxItems).toList();
+
+        if (docs.isEmpty) {
+          return Center(
+            child: Text(
+              'No tasks yet. Add one in Firebase Console.',
+              style: TextStyle(color: Colors.grey.shade700),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        return ListView.separated(
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const Divider(height: 8),
+          itemBuilder: (context, index) {
+            final taskData = docs[index].data();
+            final title = _safeString(taskData['title'], fallback: 'Untitled');
+            final description = _safeString(taskData['description'], fallback: 'No description');
+
+            return ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.task_alt, size: 18),
+              title: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18),
+                    tooltip: 'Edit task',
+                    onPressed: () => _showEditTaskDialog(docs[index]),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    tooltip: 'Delete task',
+                    onPressed: () => _deleteTask(docs[index]),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddTaskDialog() async {
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Firestore Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                minLines: 2,
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final title = titleController.text.trim();
+                final description = descriptionController.text.trim();
+
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(content: Text('Title is required')),
+                  );
+                  return;
+                }
+
+                try {
+                  await _firestore.collection('tasks').add({
+                    'title': title,
+                    'description': description.isEmpty ? 'No description' : description,
+                    'ownerUid': _currentUserUid,
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+                  if (mounted) {
+                    Navigator.of(this.context, rootNavigator: true).pop();
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      const SnackBar(content: Text('Task added')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      SnackBar(content: Text('Add failed: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditTaskDialog(DocumentSnapshot<Map<String, dynamic>> doc) async {
+    final data = doc.data() ?? <String, dynamic>{};
+    final titleController = TextEditingController(
+      text: _safeString(data['title'], fallback: ''),
+    );
+    final descriptionController = TextEditingController(
+      text: _safeString(data['description'], fallback: ''),
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Firestore Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                minLines: 2,
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final title = titleController.text.trim();
+                final description = descriptionController.text.trim();
+
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(content: Text('Title is required')),
+                  );
+                  return;
+                }
+
+                try {
+                  await doc.reference.update({
+                    'title': title,
+                    'description': description.isEmpty ? 'No description' : description,
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+                  if (mounted) {
+                    Navigator.of(this.context, rootNavigator: true).pop();
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      const SnackBar(content: Text('Task updated')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      SnackBar(content: Text('Update failed: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteTask(DocumentSnapshot<Map<String, dynamic>> doc) async {
+    final taskData = doc.data() ?? <String, dynamic>{};
+    final title = _safeString(taskData['title'], fallback: 'Untitled');
+    final shouldDelete = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Task'),
+            content: Text('Delete "$title"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (!shouldDelete) return;
+
+    try {
+      await doc.reference.delete();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Task deleted')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Delete failed: $e')),
+        );
+      }
+    }
+  }
+
+  String _safeString(dynamic value, {required String fallback}) {
+    if (value == null) return fallback;
+    if (value is String) {
+      final trimmed = value.trim();
+      return trimmed.isEmpty ? fallback : trimmed;
+    }
+
+    return value.toString();
   }
 
   Widget _buildResponsiveFooter(double screenWidth, bool isTablet) {
