@@ -14,10 +14,15 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  late final Stream<QuerySnapshot<Map<String, dynamic>>> _tasksStream;
-  late final Future<QuerySnapshot<Map<String, dynamic>>> _tasksOnceFuture;
   Future<DocumentSnapshot<Map<String, dynamic>>>? _userFuture;
   String? _currentUserUid;
+
+  bool _showOnlyIncomplete = true;
+  bool _showOnlyFeatured = false;
+  bool _priorityDescending = false;
+  int _minimumPriority = 1;
+  int _queryLimit = 10;
+  String _statusFilter = 'active';
 
   final List<Map<String, String>> _eventCategories = [
     {
@@ -61,12 +66,44 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
   @override
   void initState() {
     super.initState();
-    _tasksStream = _firestore.collection('tasks').snapshots();
-    _tasksOnceFuture = _firestore.collection('tasks').get();
     _currentUserUid = _auth.currentUser?.uid;
     if (_currentUserUid != null) {
       _userFuture = _firestore.collection('users').doc(_currentUserUid).get();
     }
+  }
+
+  Query<Map<String, dynamic>> _buildTasksQuery() {
+    Query<Map<String, dynamic>> query = _firestore.collection('tasks');
+
+    if (_statusFilter != 'all') {
+      query = query.where('status', isEqualTo: _statusFilter);
+    }
+
+    if (_showOnlyIncomplete) {
+      query = query.where('isCompleted', isEqualTo: false);
+    }
+
+    if (_showOnlyFeatured) {
+      query = query.where('tags', arrayContains: 'featured');
+    }
+
+    query = query
+        .where('priority', isGreaterThanOrEqualTo: _minimumPriority)
+        .orderBy('priority', descending: _priorityDescending)
+        .orderBy('createdAt', descending: true)
+        .limit(_queryLimit);
+
+    return query;
+  }
+
+  String _queryPreviewText() {
+    final statusLabel = _statusFilter == 'all' ? 'all statuses' : _statusFilter;
+    final completionLabel = _showOnlyIncomplete ? 'incomplete only' : 'all tasks';
+    final featuredLabel = _showOnlyFeatured ? 'featured only' : 'all tags';
+    final direction = _priorityDescending ? 'DESC' : 'ASC';
+
+    return 'where(status==$statusLabel) + where(priority>=${_minimumPriority.toString()}) + '
+        '$completionLabel + $featuredLabel | orderBy(priority $direction), orderBy(createdAt DESC) | limit($_queryLimit)';
   }
 
   @override
@@ -443,6 +480,15 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
           const SizedBox(height: 6),
           _buildUserSummary(),
           const SizedBox(height: 8),
+          _buildQueryControls(isCompact: isCompact),
+          const SizedBox(height: 6),
+          Text(
+            _queryPreviewText(),
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               ElevatedButton.icon(
@@ -463,16 +509,79 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: _buildLiveTasksList(maxItems: isCompact ? 3 : null),
+            child: _buildLiveTasksList(),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildQueryControls({required bool isCompact}) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        DropdownButton<String>(
+          value: _statusFilter,
+          items: const [
+            DropdownMenuItem(value: 'active', child: Text('Status: active')),
+            DropdownMenuItem(value: 'paused', child: Text('Status: paused')),
+            DropdownMenuItem(value: 'done', child: Text('Status: done')),
+            DropdownMenuItem(value: 'all', child: Text('Status: all')),
+          ],
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() => _statusFilter = value);
+          },
+        ),
+        DropdownButton<int>(
+          value: _minimumPriority,
+          items: const [
+            DropdownMenuItem(value: 1, child: Text('Min P: 1')),
+            DropdownMenuItem(value: 2, child: Text('Min P: 2')),
+            DropdownMenuItem(value: 3, child: Text('Min P: 3')),
+            DropdownMenuItem(value: 4, child: Text('Min P: 4')),
+            DropdownMenuItem(value: 5, child: Text('Min P: 5')),
+          ],
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() => _minimumPriority = value);
+          },
+        ),
+        DropdownButton<int>(
+          value: _queryLimit,
+          items: const [
+            DropdownMenuItem(value: 5, child: Text('Limit 5')),
+            DropdownMenuItem(value: 10, child: Text('Limit 10')),
+            DropdownMenuItem(value: 20, child: Text('Limit 20')),
+          ],
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() => _queryLimit = value);
+          },
+        ),
+        FilterChip(
+          label: Text(isCompact ? 'Incomplete' : 'Incomplete only'),
+          selected: _showOnlyIncomplete,
+          onSelected: (value) => setState(() => _showOnlyIncomplete = value),
+        ),
+        FilterChip(
+          label: const Text('Featured'),
+          selected: _showOnlyFeatured,
+          onSelected: (value) => setState(() => _showOnlyFeatured = value),
+        ),
+        FilterChip(
+          label: Text(_priorityDescending ? 'Priority DESC' : 'Priority ASC'),
+          selected: _priorityDescending,
+          onSelected: (value) => setState(() => _priorityDescending = value),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTasksSummary() {
     return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      future: _tasksOnceFuture,
+      future: _buildTasksQuery().get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Text(
@@ -540,9 +649,9 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
     );
   }
 
-  Widget _buildLiveTasksList({int? maxItems}) {
+  Widget _buildLiveTasksList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: _tasksStream,
+      stream: _buildTasksQuery().snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -557,8 +666,7 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
           );
         }
 
-        final allDocs = snapshot.data?.docs ?? [];
-        final docs = maxItems == null ? allDocs : allDocs.take(maxItems).toList();
+        final docs = snapshot.data?.docs ?? [];
 
         if (docs.isEmpty) {
           return Center(
@@ -577,24 +685,40 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
             final taskData = docs[index].data();
             final title = _safeString(taskData['title'], fallback: 'Untitled');
             final description = _safeString(taskData['description'], fallback: 'No description');
+            final status = _safeString(taskData['status'], fallback: 'active');
+            final priority = _safeInt(taskData['priority'], fallback: 3);
+            final isCompleted = _safeBool(taskData['isCompleted'], fallback: false);
 
             return ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.task_alt, size: 18),
+              leading: Icon(
+                isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                size: 18,
+                color: isCompleted ? Colors.green : Colors.orange,
+              ),
               title: Text(
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text(
-                description,
+                '$description\nPriority: $priority | Status: $status',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              isThreeLine: true,
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  IconButton(
+                    icon: Icon(
+                      isCompleted ? Icons.undo : Icons.check,
+                      size: 18,
+                    ),
+                    tooltip: isCompleted ? 'Mark incomplete' : 'Mark complete',
+                    onPressed: () => _toggleTaskCompletion(docs[index], !isCompleted),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.edit, size: 18),
                     tooltip: 'Edit task',
@@ -617,69 +741,127 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
   Future<void> _showAddTaskDialog() async {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
+    int priority = 3;
+    String status = 'active';
+    bool isCompleted = false;
+    bool featured = false;
 
     await showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Firestore Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Add Firestore Task'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: descriptionController,
+                      decoration: const InputDecoration(labelText: 'Description'),
+                      minLines: 2,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: const [
+                        DropdownMenuItem(value: 'active', child: Text('active')),
+                        DropdownMenuItem(value: 'paused', child: Text('paused')),
+                        DropdownMenuItem(value: 'done', child: Text('done')),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => status = value);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<int>(
+                      value: priority,
+                      decoration: const InputDecoration(labelText: 'Priority (1-5)'),
+                      items: const [
+                        DropdownMenuItem(value: 1, child: Text('1')),
+                        DropdownMenuItem(value: 2, child: Text('2')),
+                        DropdownMenuItem(value: 3, child: Text('3')),
+                        DropdownMenuItem(value: 4, child: Text('4')),
+                        DropdownMenuItem(value: 5, child: Text('5')),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => priority = value);
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    CheckboxListTile(
+                      value: isCompleted,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Completed'),
+                      onChanged: (value) => setDialogState(() => isCompleted = value ?? false),
+                    ),
+                    CheckboxListTile(
+                      value: featured,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Featured tag'),
+                      onChanged: (value) => setDialogState(() => featured = value ?? false),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                minLines: 2,
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final title = titleController.text.trim();
-                final description = descriptionController.text.trim();
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final title = titleController.text.trim();
+                    final description = descriptionController.text.trim();
 
-                if (title.isEmpty) {
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    const SnackBar(content: Text('Title is required')),
-                  );
-                  return;
-                }
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        const SnackBar(content: Text('Title is required')),
+                      );
+                      return;
+                    }
 
-                try {
-                  await _firestore.collection('tasks').add({
-                    'title': title,
-                    'description': description.isEmpty ? 'No description' : description,
-                    'ownerUid': _currentUserUid,
-                    'updatedAt': FieldValue.serverTimestamp(),
-                  });
-                  if (mounted) {
-                    Navigator.of(this.context, rootNavigator: true).pop();
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      const SnackBar(content: Text('Task added')),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      SnackBar(content: Text('Add failed: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
+                    try {
+                      await _firestore.collection('tasks').add({
+                        'title': title,
+                        'description': description.isEmpty ? 'No description' : description,
+                        'status': status,
+                        'priority': priority,
+                        'isCompleted': isCompleted,
+                        'tags': featured ? ['featured'] : <String>[],
+                        'ownerUid': _currentUserUid,
+                        'createdAt': FieldValue.serverTimestamp(),
+                        'updatedAt': FieldValue.serverTimestamp(),
+                      });
+                      if (mounted) {
+                        Navigator.of(this.context, rootNavigator: true).pop();
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          const SnackBar(content: Text('Task added')),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(content: Text('Add failed: $e')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -693,71 +875,148 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
     final descriptionController = TextEditingController(
       text: _safeString(data['description'], fallback: ''),
     );
+    int priority = _safeInt(data['priority'], fallback: 3);
+    String status = _safeString(data['status'], fallback: 'active');
+    bool isCompleted = _safeBool(data['isCompleted'], fallback: false);
+    final tags = _safeStringList(data['tags']);
+    bool featured = tags.contains('featured');
 
     await showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Firestore Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Edit Firestore Task'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: descriptionController,
+                      decoration: const InputDecoration(labelText: 'Description'),
+                      minLines: 2,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: const [
+                        DropdownMenuItem(value: 'active', child: Text('active')),
+                        DropdownMenuItem(value: 'paused', child: Text('paused')),
+                        DropdownMenuItem(value: 'done', child: Text('done')),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => status = value);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<int>(
+                      value: priority,
+                      decoration: const InputDecoration(labelText: 'Priority (1-5)'),
+                      items: const [
+                        DropdownMenuItem(value: 1, child: Text('1')),
+                        DropdownMenuItem(value: 2, child: Text('2')),
+                        DropdownMenuItem(value: 3, child: Text('3')),
+                        DropdownMenuItem(value: 4, child: Text('4')),
+                        DropdownMenuItem(value: 5, child: Text('5')),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() => priority = value);
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    CheckboxListTile(
+                      value: isCompleted,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Completed'),
+                      onChanged: (value) => setDialogState(() => isCompleted = value ?? false),
+                    ),
+                    CheckboxListTile(
+                      value: featured,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Featured tag'),
+                      onChanged: (value) => setDialogState(() => featured = value ?? false),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                minLines: 2,
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final title = titleController.text.trim();
-                final description = descriptionController.text.trim();
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final title = titleController.text.trim();
+                    final description = descriptionController.text.trim();
 
-                if (title.isEmpty) {
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    const SnackBar(content: Text('Title is required')),
-                  );
-                  return;
-                }
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        const SnackBar(content: Text('Title is required')),
+                      );
+                      return;
+                    }
 
-                try {
-                  await doc.reference.update({
-                    'title': title,
-                    'description': description.isEmpty ? 'No description' : description,
-                    'updatedAt': FieldValue.serverTimestamp(),
-                  });
-                  if (mounted) {
-                    Navigator.of(this.context, rootNavigator: true).pop();
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      const SnackBar(content: Text('Task updated')),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      SnackBar(content: Text('Update failed: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Update'),
-            ),
-          ],
+                    try {
+                      await doc.reference.update({
+                        'title': title,
+                        'description': description.isEmpty ? 'No description' : description,
+                        'status': status,
+                        'priority': priority,
+                        'isCompleted': isCompleted,
+                        'tags': featured ? ['featured'] : <String>[],
+                        'updatedAt': FieldValue.serverTimestamp(),
+                      });
+                      if (mounted) {
+                        Navigator.of(this.context, rootNavigator: true).pop();
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          const SnackBar(content: Text('Task updated')),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(content: Text('Update failed: $e')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Update'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
+  }
+
+  Future<void> _toggleTaskCompletion(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+    bool nextValue,
+  ) async {
+    try {
+      await doc.reference.update({
+        'isCompleted': nextValue,
+        'status': nextValue ? 'done' : 'active',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status update failed: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _deleteTask(DocumentSnapshot<Map<String, dynamic>> doc) async {
@@ -808,6 +1067,30 @@ class _ResponsiveHomeState extends State<ResponsiveHome> {
     }
 
     return value.toString();
+  }
+
+  int _safeInt(dynamic value, {required int fallback}) {
+    if (value == null) return fallback;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString()) ?? fallback;
+  }
+
+  bool _safeBool(dynamic value, {required bool fallback}) {
+    if (value == null) return fallback;
+    if (value is bool) return value;
+    final text = value.toString().toLowerCase();
+    if (text == 'true') return true;
+    if (text == 'false') return false;
+    return fallback;
+  }
+
+  List<String> _safeStringList(dynamic value) {
+    if (value is List) {
+      return value.map((item) => item.toString()).toList();
+    }
+
+    return <String>[];
   }
 
   Widget _buildResponsiveFooter(double screenWidth, bool isTablet) {

@@ -11,6 +11,7 @@
 SmartKirana/LoyalBazaar is a **mobile-first digital loyalty platform** designed specifically for small businesses (Kirana stores, salons, retail shops) in Tier-2 and Tier-3 towns across India.
 
 ### Project Highlights
+
 - ✅ **Flutter** cross-platform app (Android, iOS, Web)
 - ✅ **Firebase** authentication & Firestore database
 - ✅ **Multiple Demo Apps** for learning & testing
@@ -19,12 +20,123 @@ SmartKirana/LoyalBazaar is a **mobile-first digital loyalty platform** designed 
 - ✅ **Comprehensive Documentation** - Architecture, setup, features
 
 ### Features Implemented
+
 - User authentication (Firebase Auth)
 - Customer management system
 - Loyalty points tracking
 - Reward redemption
 - Analytics dashboard
 - **Form handling with validation** (NEW)
+
+---
+
+## Firestore Query Implementation (March 19, 2026)
+
+This project now includes a Firestore query demo in `lib/screens/responsive_home.dart` with real-time filtering, sorting, and limiting.
+
+### Dependency Confirmation
+
+The dependency is present in `pubspec.yaml`:
+
+```yaml
+dependencies:
+  cloud_firestore: ^5.6.8
+```
+
+### Queries Used
+
+The task list query combines:
+
+- `where('status', isEqualTo: ...)` for equality filtering
+- `where('priority', isGreaterThanOrEqualTo: ...)` for comparison filtering
+- `where('tags', arrayContains: 'featured')` for array filtering
+- `where('isCompleted', isEqualTo: false)` for completion filtering
+- `orderBy('priority', descending: ...)` for priority sorting
+- `orderBy('createdAt', descending: true)` for latest-first tie-break sorting
+- `limit(...)` to cap result size and improve read performance
+
+```dart
+Query<Map<String, dynamic>> _buildTasksQuery() {
+  Query<Map<String, dynamic>> query = _firestore.collection('tasks');
+
+  if (_statusFilter != 'all') {
+    query = query.where('status', isEqualTo: _statusFilter);
+  }
+
+  if (_showOnlyIncomplete) {
+    query = query.where('isCompleted', isEqualTo: false);
+  }
+
+  if (_showOnlyFeatured) {
+    query = query.where('tags', arrayContains: 'featured');
+  }
+
+  return query
+      .where('priority', isGreaterThanOrEqualTo: _minimumPriority)
+      .orderBy('priority', descending: _priorityDescending)
+      .orderBy('createdAt', descending: true)
+      .limit(_queryLimit);
+}
+```
+
+### StreamBuilder Real-Time UI
+
+The UI is bound directly to query output via `.snapshots()`:
+
+```dart
+StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+  stream: _buildTasksQuery().snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final docs = snapshot.data?.docs ?? [];
+    return ListView.builder(
+      itemCount: docs.length,
+      itemBuilder: (context, index) {
+        final task = docs[index].data();
+        return ListTile(
+          title: Text(task['title'] ?? 'Untitled'),
+          subtitle: Text("Priority: ${task['priority'] ?? 0}"),
+        );
+      },
+    );
+  },
+)
+```
+
+### Common Query Issues and Notes
+
+- Composite index may be required when combining multiple `where` clauses with multiple `orderBy` fields.
+- If Firestore throws an index error, open the generated Firebase Console link and create the suggested index.
+- Sorting by timestamps (`createdAt`) keeps recently created records predictable in the result list.
+- Limiting results reduces reads and improves render speed on small devices.
+
+### Screenshot Section
+
+Add screenshots here after testing:
+
+1. Firestore Console (`tasks` data with fields: `status`, `priority`, `tags`, `isCompleted`, `createdAt`)
+2. Flutter app with filters applied and sorted list visible
+
+Suggested paths:
+
+- `assets/images/firestore_tasks_console.png`
+- `assets/images/firestore_query_results.png`
+
+Markdown placeholders:
+
+```md
+![Firestore Console Tasks](assets/images/firestore_tasks_console.png)
+![Flutter Filtered/Sorted Query Results](assets/images/firestore_query_results.png)
+```
+
+### Reflection
+
+- Querying improves performance by downloading only relevant task documents instead of the entire collection.
+- Filters were selected to match common dashboard use cases: active tasks, minimum priority, optional featured tasks, and completion state.
+- Combining filters and sorting can require composite indexes; when prompted by Firestore, the generated index link provides the exact index definition needed.
 
 ---
 
@@ -40,6 +152,7 @@ A comprehensive form validation system has been implemented demonstrating Flutte
 ### Features Demonstrated
 
 #### 1. **TextFormField Widgets**
+
 ```dart
 // Name input with validation
 TextFormField(
@@ -72,12 +185,14 @@ TextFormField(
 ```
 
 #### 2. **Form State Management**
+
 - Uses `Form` widget with `GlobalKey<FormState>`
 - Centralized form validation with single `validate()` call
 - Controller-based input value management
 - Clean state disposal in `dispose()`
 
 #### 3. **Form Submission**
+
 ```dart
 void _submitForm() {
   if (_formKey.currentState!.validate()) {
@@ -91,6 +206,7 @@ void _submitForm() {
 ```
 
 #### 4. **User Feedback**
+
 - **Error messages** displayed below each field
 - **SnackBar** confirms successful submission
 - **Immediate validation** as user types
@@ -98,9 +214,9 @@ void _submitForm() {
 
 ### Validation Patterns
 
-| Field | Validation Rule | Error Message |
-|-------|-----------------|----------------|
-| Name | Non-empty, trimmed | "Enter your name" |
+| Field | Validation Rule          | Error Message                              |
+| ----- | ------------------------ | ------------------------------------------ |
+| Name  | Non-empty, trimmed       | "Enter your name"                          |
 | Email | Non-empty + contains "@" | "Enter your email" / "Enter a valid email" |
 
 ### Best Practices Implemented
@@ -112,13 +228,14 @@ void _submitForm() {
 ✅ **TextEditingController** for value management  
 ✅ **Proper disposal** of resources in dispose()  
 ✅ **User feedback** via SnackBar & error messages  
-✅ **Email regex validation** for format checking  
+✅ **Email regex validation** for format checking
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Flutter 3.x+ installed
 - Android/iOS SDK configured
 - VS Code or Android Studio
@@ -248,6 +365,7 @@ SmartKirana uses Firebase Authentication with automatic session persistence:
 #### Verification Cases
 
 **Auto-Login Verification:**
+
 1. Login with valid Firebase credentials
 2. Confirm app opens DashboardScreen
 3. Close app completely
@@ -255,12 +373,14 @@ SmartKirana uses Firebase Authentication with automatic session persistence:
 5. Expected: App opens DashboardScreen directly
 
 **Logout Verification:**
+
 1. Tap logout button in dashboard
 2. Expected: Immediate return to LoginScreen
 3. Close and reopen app
 4. Expected: App stays on LoginScreen
 
 #### Session State Expectations
+
 - ✅ Logged-in state persists after app restart
 - ✅ Logged-out state persists after app restart
 - ✅ Login/logout changes reflected immediately
@@ -326,6 +446,7 @@ void _submitForm() {
 ## 📋 Form Validation Best Practices
 
 ### 1. Use FormState for Centralized Validation
+
 ```dart
 // Define form key
 final _formKey = GlobalKey<FormState>();
@@ -345,6 +466,7 @@ _formKey.currentState!.validate()
 ```
 
 ### 2. Add Custom Validators
+
 ```dart
 String? validateEmail(String? value) {
   if (value == null || value.isEmpty) {
@@ -363,11 +485,13 @@ TextFormField(
 ```
 
 ### 3. Provide Clear Error Messages
+
 - Display errors below each field
 - Use SnackBar for form-level feedback
 - Show success confirmation after submit
 
 ### 4. Handle User Input Properly
+
 ```dart
 // Use TextEditingController for value access
 TextEditingController _nameController = TextEditingController();
@@ -384,26 +508,31 @@ void dispose() {
 ## 🎓 Learning Resources in This Project
 
 ### Form Validation
+
 - See `lib/screens/user_input_form.dart` for complete implementation
 - See `lib/utils/validators.dart` for reusable validator functions
 - Integration point: DashboardScreen button
 
 ### State Management
+
 - `StatefulWidget` patterns in all screen components
 - `StreamBuilder` for Firebase real-time updates
 - `IndexedStack` for efficient navigation
 
 ### Responsive Design
+
 - See `main_responsive_fixed.dart` for layout patterns
 - See `lib/responsive_layout.dart` for utility functions
 - Works on mobile, tablet, and web
 
 ### Firebase Integration
+
 - See `lib/services/firebase_service.dart`
 - See `lib/services/auth_service.dart`
 - See `firebase_options.dart` for configuration
 
 ### UI Components
+
 - Reusable widgets in `lib/widgets/`
 - Material 3 design system
 - Custom Card, Button, TextField components
@@ -459,7 +588,7 @@ See [pubspec.yaml](pubspec.yaml) for complete dependency list.
 ✅ Navigation performance optimized (IndexedStack)  
 ✅ BottomNavigationBar configuration fixed  
 ✅ Material 3 theme properly implemented  
-✅ Form validation system added  
+✅ Form validation system added
 
 See [BUG_FIX_SUMMARY.md](BUG_FIX_SUMMARY.md) for detailed fixes.
 
@@ -469,19 +598,19 @@ See [BUG_FIX_SUMMARY.md](BUG_FIX_SUMMARY.md) for detailed fixes.
 
 For comprehensive documentation, see:
 
-| Document | Purpose |
-|----------|---------|
-| [documentation.md](documentation.md) | Main project documentation, features, architecture |
-| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | Complete folder & file organization |
-| [Architecture.md](Architecture.md) | System architecture & data flow |
-| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | Firestore database design |
-| [FLUTTER_SETUP_GUIDE.md](FLUTTER_SETUP_GUIDE.md) | Installation instructions |
-| [BUG_FIX_SUMMARY.md](BUG_FIX_SUMMARY.md) | Bug fixes & improvements |
-| [PROJECT_PITCH.md](PROJECT_PITCH.md) | Business model & market analysis |
-| [RUN_APP.md](RUN_APP.md) | How to run different demos |
-| [RESPONSIVE_README.md](RESPONSIVE_README.md) | Responsive design patterns |
-| [README_STATE_MANAGEMENT.md](README_STATE_MANAGEMENT.md) | State management patterns |
-| [WIDGET_TREE_README.md](WIDGET_TREE_README.md) | Widget structure documentation |
+| Document                                                 | Purpose                                            |
+| -------------------------------------------------------- | -------------------------------------------------- |
+| [documentation.md](documentation.md)                     | Main project documentation, features, architecture |
+| [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)             | Complete folder & file organization                |
+| [Architecture.md](Architecture.md)                       | System architecture & data flow                    |
+| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)                 | Firestore database design                          |
+| [FLUTTER_SETUP_GUIDE.md](FLUTTER_SETUP_GUIDE.md)         | Installation instructions                          |
+| [BUG_FIX_SUMMARY.md](BUG_FIX_SUMMARY.md)                 | Bug fixes & improvements                           |
+| [PROJECT_PITCH.md](PROJECT_PITCH.md)                     | Business model & market analysis                   |
+| [RUN_APP.md](RUN_APP.md)                                 | How to run different demos                         |
+| [RESPONSIVE_README.md](RESPONSIVE_README.md)             | Responsive design patterns                         |
+| [README_STATE_MANAGEMENT.md](README_STATE_MANAGEMENT.md) | State management patterns                          |
+| [WIDGET_TREE_README.md](WIDGET_TREE_README.md)           | Widget structure documentation                     |
 
 ---
 
@@ -490,6 +619,7 @@ For comprehensive documentation, see:
 ### ✅ Completed (v1.0.1 - March 18, 2026)
 
 **Core Features**
+
 - [x] Flutter project setup (all platforms)
 - [x] Firebase authentication
 - [x] Firestore database integration
@@ -497,6 +627,7 @@ For comprehensive documentation, see:
 - [x] Navigation system
 
 **Screens & UI**
+
 - [x] Welcome/Login screens
 - [x] Dashboard with tabs & bottom nav
 - [x] **User Input Form with validation** (NEW)
@@ -506,11 +637,13 @@ For comprehensive documentation, see:
 - [x] Analytics dashboard
 
 **State Management**
+
 - [x] StatefulWidget implementation
 - [x] StreamBuilder for real-time data
 - [x] Proper lifecycle management
 
 **Documentation**
+
 - [x] Architecture documentation
 - [x] Setup guides
 - [x] Database schema
@@ -558,7 +691,7 @@ To add new features:
 ✅ Code organization & modularity  
 ✅ Documentation & code comments  
 ✅ Error handling & user feedback  
-✅ Architecture patterns (layered)  
+✅ Architecture patterns (layered)
 
 ---
 
@@ -567,6 +700,7 @@ To add new features:
 ### Common Issues & Solutions
 
 #### Issue: "Flutter not found"
+
 ```bash
 # Add Flutter to PATH environment variable
 # Windows: C:\flutter\bin
@@ -576,6 +710,7 @@ flutter --version
 ```
 
 #### Issue: "Dependencies not found"
+
 ```bash
 # Clean and reinstall
 flutter clean
@@ -584,6 +719,7 @@ flutter pub upgrade
 ```
 
 #### Issue: "Build fails on Android"
+
 ```bash
 # Clean build
 flutter clean
@@ -596,18 +732,21 @@ flutter run -v
 ```
 
 #### Issue: "Firebase not initialized"
+
 - Check `firebase_options.dart` configuration
 - Ensure `google-services.json` in `android/app/`
 - Verify Firebase project is active in Firebase Console
 - Check internet connection during first run
 
 #### Issue: "Form validation not working"
+
 - Ensure Form widget has `GlobalKey<FormState>`
 - Verify TextFormField has `validator` property
 - Check form key reference is correct
 - Validate state before submit: `_formKey.currentState!.validate()`
 
 #### Issue: "Hot reload not working"
+
 ```bash
 # Full restart instead
 flutter run
@@ -647,6 +786,7 @@ dart format lib/
 ## 📞 Getting Help
 
 ### Resources
+
 - **Flutter Docs**: https://flutter.dev/docs
 - **Firebase Docs**: https://firebase.google.com/docs
 - **Dart Docs**: https://dart.dev/guides
@@ -654,6 +794,7 @@ dart format lib/
 - **Flutter Community**: https://flutter.dev/community
 
 ### Project Documentation
+
 - See individual README files in project root
 - Check detailed guides in `docs/` folder
 - Reference code examples in `lib/` folder
@@ -664,15 +805,15 @@ dart format lib/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `lib/main.dart` | Production entry point |
-| `lib/screens/user_input_form.dart` | Form validation example (NEW) |
-| `lib/screens/dashboard_screen.dart` | Main app dashboard |
-| `lib/services/firebase_service.dart` | Firebase initialization |
-| `lib/services/auth_service.dart` | Authentication logic |
-| `lib/utils/validators.dart` | Reusable validators (NEW) |
-| `firebase_options.dart` | Firebase configuration |
+| File                                 | Purpose                       |
+| ------------------------------------ | ----------------------------- |
+| `lib/main.dart`                      | Production entry point        |
+| `lib/screens/user_input_form.dart`   | Form validation example (NEW) |
+| `lib/screens/dashboard_screen.dart`  | Main app dashboard            |
+| `lib/services/firebase_service.dart` | Firebase initialization       |
+| `lib/services/auth_service.dart`     | Authentication logic          |
+| `lib/utils/validators.dart`          | Reusable validators (NEW)     |
+| `firebase_options.dart`              | Firebase configuration        |
 
 ### Command Reference
 
@@ -743,9 +884,10 @@ flutter run --profile                        # Profile build
 ✅ **Responsive design** across all devices  
 ✅ **Comprehensive documentation** for every feature  
 ✅ **Clean architecture** with separation of concerns  
-✅ **Reusable components** and utilities  
+✅ **Reusable components** and utilities
 
 The project is ready for:
+
 - Feature expansion
 - Backend API integration
 - Advanced state management implementation
@@ -757,6 +899,7 @@ The project is ready for:
 ## 📝 Version History
 
 ### v1.0.1 - Form Validation & Input Handling (March 18, 2026)
+
 - ✨ User Input Form implementation
 - ✨ Form validation patterns & best practices
 - ✨ Validators utility module
@@ -765,6 +908,7 @@ The project is ready for:
 - 📚 README updates
 
 ### v1.0.0 - Initial Release (February 25, 2026)
+
 - ✨ Complete Flutter project structure
 - ✨ Firebase authentication system
 - ✨ Firestore database integration
@@ -779,7 +923,7 @@ The project is ready for:
 **Project**: SmartKirana / LoyalBazaar  
 **Status**: Active Development  
 **Version**: 1.0.1  
-**Last Updated**: March 18, 2026  
+**Last Updated**: March 18, 2026
 
 ---
 
