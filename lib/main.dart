@@ -1,11 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
 import 'screens/auth_screen.dart';
 
 import 'screens/dashboard_screen.dart';
+import 'services/fcm_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  debugPrint(
+    'Background notification: ${message.notification?.title} - ${message.notification?.body}',
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +31,9 @@ Future<void> main() async {
     );
     debugPrint('Firebase initialized with DefaultFirebaseOptions');
   }
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await FcmService.instance.initialize();
 
   runApp(const SmartKiranaApp());
 }

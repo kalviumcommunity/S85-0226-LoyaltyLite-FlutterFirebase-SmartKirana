@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../services/auth_service.dart';
+import '../services/fcm_service.dart';
 import 'asset_demo_screen.dart';
 import 'auth_test_screen.dart';
 
@@ -16,7 +19,41 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final AuthService _authService = AuthService();
+  final FcmService _fcmService = FcmService.instance;
   bool _isSigningOut = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fcmService.latestMessage.addListener(_onIncomingMessage);
+  }
+
+  @override
+  void dispose() {
+    _fcmService.latestMessage.removeListener(_onIncomingMessage);
+    super.dispose();
+  }
+
+  void _onIncomingMessage() {
+    if (!mounted) {
+      return;
+    }
+
+    final message = _fcmService.latestMessage.value;
+    if (message == null) {
+      return;
+    }
+
+    final title = message.notification?.title ?? 'Daily Alert';
+    final body = message.notification?.body ?? 'A new update is available.';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$title: $body'),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
 
   Future<void> _logout(BuildContext context) async {
     if (_isSigningOut) {
@@ -163,6 +200,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              _buildDailyAlertCard(),
+              const SizedBox(height: 24),
               
               // Stats Cards
               Text(
@@ -239,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               
               _buildActionButton(
                 context,
-                Icons.testing,
+                Icons.science,
                 'Test Authentication',
                 'Verify Firebase Auth functionality',
                 Colors.green,
@@ -297,6 +336,129 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyAlertCard() {
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.notifications_active, color: Colors.red.shade700),
+                const SizedBox(width: 8),
+                Text(
+                  'Daily Alert (FCM)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Use this token to send "Shift Update" notification from Firebase Console.',
+              style: TextStyle(color: Colors.grey.shade700),
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder<NotificationSettings?>(
+              valueListenable: _fcmService.permissionSettings,
+              builder: (context, _, __) {
+                return Text(
+                  'Permission: ${_fcmService.permissionStatusLabel()}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            ValueListenableBuilder<String?>(
+              valueListenable: _fcmService.token,
+              builder: (context, fcmToken, _) {
+                return SelectableText(
+                  'FCM Token: ${fcmToken ?? 'Fetching token...'}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade800,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await _fcmService.refreshToken();
+                    if (!mounted) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('FCM token refreshed.')),
+                    );
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh Token'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final currentToken = _fcmService.token.value;
+                    if (currentToken == null || currentToken.isEmpty) {
+                      if (!mounted) {
+                        return;
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Token not available yet.')),
+                      );
+                      return;
+                    }
+
+                    await Clipboard.setData(ClipboardData(text: currentToken));
+                    if (!mounted) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('FCM token copied.')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy Token'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder<String>(
+              valueListenable: _fcmService.launchContext,
+              builder: (context, stateText, _) {
+                return Text(
+                  'Last app state event: $stateText',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                );
+              },
+            ),
+            const SizedBox(height: 6),
+            ValueListenableBuilder<RemoteMessage?>(
+              valueListenable: _fcmService.latestMessage,
+              builder: (context, message, _) {
+                final title = message?.notification?.title ?? '-';
+                final body = message?.notification?.body ?? '-';
+
+                return Text(
+                  'Latest message: $title | $body',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+                );
+              },
             ),
           ],
         ),
