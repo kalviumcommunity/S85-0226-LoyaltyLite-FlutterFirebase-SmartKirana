@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/fcm_service.dart';
 import 'asset_demo_screen.dart';
 import 'auth_test_screen.dart';
+import 'locate_me_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   DashboardScreen({super.key, required this.user});
@@ -289,6 +290,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               
+              const SizedBox(height: 12),
+
+              _buildActionButton(
+                context,
+                Icons.location_on,
+                'Locate Me',
+                'Open Google Map with your live GPS marker',
+                Colors.red,
+                () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LocateMeScreen()),
+                  );
+                },
+              ),
+
               const SizedBox(height: 12),
               
               _buildActionButton(
