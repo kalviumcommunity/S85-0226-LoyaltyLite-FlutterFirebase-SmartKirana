@@ -8,7 +8,7 @@ void main() {
 }
 
 class ResponsiveDesignDemoApp extends StatelessWidget {
-  const ResponsiveDesignDemoApp({Key? key}) : super(key: key);
+  const ResponsiveDesignDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ResponsiveDesignDemoApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      initialRoute: '/',
+      initialRoute: '/forms',
       routes: {
         '/': (context) => const ResponsiveDashboard(),
         '/products': (context) => const ResponsiveProducts(),
@@ -40,7 +40,7 @@ class ResponsiveDesignDemoApp extends StatelessWidget {
 }
 
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({Key? key}) : super(key: key);
+  const NotFoundScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
