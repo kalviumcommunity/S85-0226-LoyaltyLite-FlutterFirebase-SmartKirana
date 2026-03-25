@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
- 
+import 'package:flutter/material.dart';
+
+import '../services/auth_service.dart';
+import 'auth_test_screen.dart';
+
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -12,24 +15,9 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
- 
-import '../services/auth_service.dart';
-import 'auth_test_screen.dart';
-
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
-
-  @override
-  _AuthScreenState createState() => _AuthScreenState();
-}
-
-class _AuthScreenState extends State<AuthScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   final _authService = AuthService();
-   
-  bool isLogin = true;
+
+  bool _isLogin = true;
   bool _isLoading = false;
 
   @override
@@ -47,118 +35,75 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-       if (isLogin) {
-        // Login logic
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      } else {
-        // Sign Up logic
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Authentication Error';
-      
- 
-      User? user;
-      
-      if (isLogin) {
-        user = await _authService.login(
+      if (_isLogin) {
+        await _authService.login(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
       } else {
-        user = await _authService.signUp(
+        await _authService.signUp(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isLogin ? 'Login successful.' : 'Signup successful.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
 
-      if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isLogin ? 'Login Successful!' : 'Signup Successful!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Authentication failed. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_friendlyAuthError(error.code)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
       }
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      
-      setState(() => _isLoading = false);
-      
-      String errorMessage = 'Authentication Error';
-       if (e.code == 'weak-password') {
-        errorMessage = 'The password provided is too weak.';
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'An account already exists for this email.';
-      } else if (e.code == 'user-not-found') {
-        errorMessage = 'No user found for this email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password provided.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'The email address is not valid.';
-      } else if (e.code == 'invalid-credential') {
-        errorMessage = 'The email or password is incorrect.';
-      } else if (e.code == 'too-many-requests') {
-        errorMessage = 'Too many attempts. Please wait and try again.';
-      }
- 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Authentication failed: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
- 
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
- 
+    }
+  }
+
+  String _friendlyAuthError(String code) {
+    switch (code) {
+      case 'weak-password':
+        return 'The password provided is too weak.';
+      case 'email-already-in-use':
+        return 'An account already exists for this email.';
+      case 'user-not-found':
+        return 'No user found for this email.';
+      case 'wrong-password':
+        return 'Wrong password provided.';
+      case 'invalid-email':
+        return 'The email address is not valid.';
+      case 'invalid-credential':
+        return 'The email or password is incorrect.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please wait and try again.';
+      default:
+        return 'Authentication error. Please try again.';
     }
   }
 
@@ -166,9 +111,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         title: Text(isLogin ? 'Login' : 'Sign Up'),
- 
-        title: Text('Firebase Auth Demo'),
+        title: Text(_isLogin ? 'Login' : 'Sign Up'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -189,55 +132,44 @@ class _AuthScreenState extends State<AuthScreen> {
               padding: const EdgeInsets.all(24),
               child: Card(
                 elevation: 12,
-                shadowColor: Colors.deepPurple.withOpacity(0.3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(24),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                           isLogin ? Icons.login : Icons.person_add,
- 
-                          Icons.account_circle,
-                           size: 80,
+                          _isLogin ? Icons.login : Icons.person_add,
+                          size: 72,
                           color: Colors.deepPurple,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          isLogin ? 'Welcome Back!' : 'Create Account',
+                          _isLogin ? 'Welcome Back' : 'Create Account',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.deepPurple.shade800,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          isLogin ? 'Sign in to continue' : 'Sign up to get started',
+                          _isLogin
+                              ? 'Sign in to continue'
+                              : 'Sign up to get started',
                           style: TextStyle(
-                            fontSize: 16,
                             color: Colors.grey.shade600,
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Email',
-                            prefixIcon: const Icon(Icons.email),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.deepPurple),
-                            ),
+                            prefixIcon: Icon(Icons.email),
+                            border: OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -249,20 +181,14 @@ class _AuthScreenState extends State<AuthScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.deepPurple),
-                            ),
+                            prefixIcon: Icon(Icons.lock),
+                            border: OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -274,103 +200,47 @@ class _AuthScreenState extends State<AuthScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
-                          height: 50,
+                          height: 48,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _submitAuthForm,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 4,
-                            ),
                             child: _isLoading
-                                ? const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                        ),
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
                                       ),
-                                      SizedBox(width: 12),
-                                      Text('Please wait...'),
-                                    ],
-                                  )
-                                : Text(
-                                    isLogin ? 'Login' : 'Sign Up',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ),
+                                  )
+                                : Text(_isLogin ? 'Login' : 'Sign Up'),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              isLogin ? "Don't have an account? " : "Already have an account? ",
-                              style: TextStyle(color: Colors.grey.shade600),
+                              _isLogin
+                                  ? "Don't have an account? "
+                                  : 'Already have an account? ',
                             ),
                             GestureDetector(
-                              onTap: () => setState(() => isLogin = !isLogin),
+                              onTap: () => setState(() => _isLogin = !_isLogin),
                               child: Text(
-                                isLogin ? 'Sign Up' : 'Login',
+                                _isLogin ? 'Sign Up' : 'Login',
                                 style: const TextStyle(
                                   color: Colors.deepPurple,
                                   fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        if (!isLogin)
-                          Column(
-                            children: [
-                             const Divider(),
-                            const SizedBox(height: 10),
-                            Text(
-                              'By signing up, you agree to our terms and conditions',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-                               const Divider(),
-                              const SizedBox(height: 10),
-                              Text(
-                                'By signing up, you agree to our terms and conditions',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
                       ],
                     ),
                   ),
@@ -388,8 +258,7 @@ class _AuthScreenState extends State<AuthScreen> {
         },
         backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.bug_report, color: Colors.white),
-        tooltip: 'Test Authentication',
       ),
-     );
+    );
   }
 }

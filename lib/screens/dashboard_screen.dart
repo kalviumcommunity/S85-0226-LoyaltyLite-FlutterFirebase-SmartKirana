@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/fcm_service.dart';
 import 'asset_demo_screen.dart';
 import 'auth_test_screen.dart';
+import 'live_items_viewer_screen.dart';
 import 'locate_me_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -301,6 +302,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const LocateMeScreen()),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              _buildActionButton(
+                context,
+                Icons.view_list,
+                'Live Items Viewer',
+                'Demo loading, empty, and error states with retry',
+                Colors.deepPurple,
+                () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LiveItemsViewerScreen()),
                   );
                 },
               ),
