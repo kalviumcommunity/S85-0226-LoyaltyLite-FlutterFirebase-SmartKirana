@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'image_picker.dart';
+import 'firebase_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -267,6 +269,9 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (title == 'Profile') {
+      return const ProfileScreen();
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -280,6 +285,133 @@ class PlaceholderScreen extends StatelessWidget {
             Text(
               '$title Screen',
               style: const TextStyle(fontSize: 22, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ImagePicker _picker = ImagePicker();
+  String? _profileImageUrl;
+  bool _isUploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data()!.containsKey('profileImageUrl')) {
+        setState(() {
+          _profileImageUrl = userDoc.data()!['profileImageUrl'];
+        });
+      }
+    }
+  }
+
+  Future<void> _uploadProfileImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser!;
+      final storageRef = FirebaseStorage.instance.ref();
+      final profileImagesRef = storageRef.child('profile_images/${user.uid}.jpg');
+
+      final uploadTask = await profileImagesRef.putFile(File(image.path));
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'profileImageUrl': downloadUrl,
+      }, SetOptions(merge: true));
+
+      setState(() {
+        _profileImageUrl = downloadUrl;
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile image updated successfully!')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload image: $e')),
+      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _uploadProfileImage,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.grey.shade300,
+                    backgroundImage: _profileImageUrl != null ? NetworkImage(_profileImageUrl!) : null,
+                    child: _profileImageUrl == null
+                        ? Icon(Icons.person, size: 80, color: Colors.grey.shade600)
+                        : null,
+                  ),
+                  if (_isUploading)
+                    const CircularProgressIndicator()
+                  else
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 22),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              user?.displayName ?? 'Anonymous User',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              user?.email ?? 'No email provided',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
