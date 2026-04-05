@@ -6,6 +6,23 @@ A comprehensive Flutter application demonstrating advanced mobile development fe
 
 Smart Kirana is a feature-rich mobile application designed for small businesses in Tier-2 and Tier-3 towns in India to manage customer loyalty programs. This implementation showcases production-ready Flutter development patterns and best practices.
 
+## 📸 Project Screenshots
+
+Save your screenshot files in `assets/images` with these names:
+
+- `build_release_terminal.jpg`
+- `firebase_auth_users.jpg`
+
+Then they will render in this README:
+
+### Flutter Build Output
+
+![Flutter Build APK Release Output](assets/images/build_release_terminal.jpg)
+
+### Firebase Authentication Users
+
+![Firebase Authentication Users List](assets/images/firebase_auth_users.jpg)
+
 ## ✨ Key Features
 
 ### 🔐 Authentication System
