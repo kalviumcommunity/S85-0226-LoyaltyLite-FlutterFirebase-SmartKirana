@@ -243,7 +243,7 @@ Example filenames (recommended for grading/demo):
 Example markdown (will render when files are present). This repository already contains WhatsApp-exported screenshots — you can reference them directly, for example:
 
 ```md
-![Login screen](assets/images/WhatsApp Image 2026-04-16 at 9.20.35 AM.jpeg)
+![Login screen](assets/images/login.jpeg)
 ![CRUD example](assets/images/WhatsApp Image.jpeg)
 ```
 
