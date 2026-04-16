@@ -1,369 +1,316 @@
-# Smart Kirana - Complete Flutter Application
+# Smart Kirana — LoyaltyLite (Flutter + Firebase)
 
-A comprehensive Flutter application demonstrating advanced mobile development features including Firebase authentication, Google Maps integration, state management, cloud functions, and real-time synchronization.
+Professional, full-featured sample app used for teaching mobile engineering patterns, Firebase integration, maps, and real-time sync.
 
-## 📱 Application Overview
+---
 
-Smart Kirana is a feature-rich mobile application designed for small businesses in Tier-2 and Tier-3 towns in India to manage customer loyalty programs. This implementation showcases production-ready Flutter development patterns and best practices.
+## Table of contents
 
-## 📸 Project Screenshots
+- [A. Project Overview](#a-project-overview)
+- [B. Architecture & Tech Stack](#b-architecture--tech-stack)
+- [C. Setup & Installation](#c-setup--installation)
+- [D. Feature Demonstration](#d-feature-demonstration)
+- [E. Testing Summary (template)](#e-testing-summary-template)
+- [F. Reflection (student prompts)](#f-reflection-student-prompts)
+- [Appendix & Links](#appendix--links)
 
-Save your screenshot files in `assets/images` with these names:
+---
 
-- `build_release_terminal.jpg`
-- `firebase_auth_users.jpg`
+## A. Project Overview
 
-Then they will render in this README:
+**App name:** Smart Kirana — LoyaltyLite
 
-### Flutter Build Output
+**Purpose:**
+Smart Kirana is a demo/prototype Flutter app that demonstrates how to build a small-business loyalty app with secure authentication, Firestore-backed data, cloud functions, maps, notifications, theming, and common production concerns (release signing, environment configuration, and testing).
 
-![Flutter Build APK Release Output](assets/images/build_release_terminal.jpg)
+Primary user workflows:
 
-### Firebase Authentication Users
+- Onboard → Sign up or Login
+- Create or edit user profile
+- Browse items / offers and earn loyalty points
+- Redeem points or coupons
+- View location-based offers on map
+- Receive and handle push notifications (foreground/background/terminated)
 
-![Firebase Authentication Users List](assets/images/firebase_auth_users.jpg)
+Key features
 
-## ✨ Key Features
+- Authentication (Email / Password)
+- Firestore CRUD (items, profiles, transactions)
+- Google Maps integration (location, markers)
+- Push notifications (FCM)
+- Theming (light/dark toggle)
+- Cloud Functions for business logic
+- Basic offline resilience and StreamBuilder-based UI
 
-### 🔐 Authentication System
-- **Firebase Authentication Integration**: Email/password login and signup
-- **Session Management**: Persistent user sessions with automatic logout
-- **Form Validation**: Input validation with error handling
-- **Loading States**: Visual feedback during authentication processes
-- **Secure Navigation**: Protected routes with authentication gates
+---
 
-### 🗺️ Google Maps Integration
-- **Interactive Maps**: Multiple map types (Normal, Satellite, Hybrid, Terrain)
-- **Location Services**: User location tracking with toggle controls
-- **Map Controls**: Pan, zoom, and gesture-based navigation
-- **Event Logging**: Real-time map interaction tracking
-- **API Configuration**: Platform-specific setup for Android and iOS
+## B. Architecture & Tech Stack
 
-### 🔄 State Management
-- **setState() Patterns**: Local state management demonstrations
-- **Dynamic UI Updates**: Real-time interface changes based on state
-- **Counter Examples**: Increment/decrement with visual feedback
-- **Interactive Controls**: Sliders, toggles, and buttons with state persistence
-- **Conditional Styling**: Dynamic styling based on application state
+Tech stack
 
-### ☁️ Cloud Functions
-- **Callable Functions**: Direct Flutter-to-Cloud Functions communication
-- **Event-Based Triggers**: Firestore document change handlers
-- **Real-time Processing**: Serverless backend logic execution
-- **Error Handling**: Comprehensive error management and logging
-- **Function Logging**: Real-time execution tracking and debugging
+- Flutter (stable)
+- Dart
+- Firebase: Authentication, Firestore, Cloud Functions, Cloud Storage, FCM
+- Google Maps (google_maps_flutter)
+- State management: examples with local `setState`, and guidance for Provider / Riverpod
 
-### 📊 Real-time Synchronization
-- **Firestore Integration**: Live data synchronization
-- **StreamBuilder Usage**: Reactive UI updates based on data changes
-- **Message Broadcasting**: Real-time message delivery and display
-- **Event Monitoring**: Sync event logging and status tracking
-- **Data Persistence**: Automatic data saving and retrieval
+High-level widget tree (example)
 
-## 🏗️ Architecture & Design
-
-### **Material Design 3**
-- Modern UI components with consistent theming
-- Responsive layouts for various screen sizes
-- Custom color schemes and typography
-- Smooth animations and transitions
-- Accessibility considerations
-
-### **Navigation Structure**
-- Bottom navigation bar with 5 main sections
-- Screen-specific app bar actions
-- Deep linking support
-- State preservation during navigation
-- Intuitive user flow patterns
-
-### **Component Organization**
-- Modular screen architecture
-- Reusable widget components
-- Separation of concerns
-- Clean code structure
-- Maintainable design patterns
-
-## 🚀 Getting Started
-
-### **Prerequisites**
-- Flutter SDK (>=3.0.0)
-- Dart SDK
-- Android Studio / VS Code
-- Firebase project (for production deployment)
-- Google Maps API key (for maps functionality)
-
-### **Installation**
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/kalviumcommunity/S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana.git
-   cd Smart Kirana
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Run the application**
-   ```bash
-   flutter run smart_kirana_final_fixed.dart
-   ```
-
-### **Firebase Setup**
-
-1. **Create Firebase Project**
-   - Go to [Firebase Console](https://console.firebase.google.com)
-   - Create a new project
-   - Enable Authentication, Firestore, and Cloud Functions
-
-2. **Configure Authentication**
-   - Enable Email/Password sign-in method
-   - Configure security rules as needed
-
-3. **Setup Firestore**
-   - Create Firestore database
-   - Configure security rules
-   - Set up collections for users, messages, and other data
-
-### **Google Maps Setup**
-
-1. **Get API Key**
-   - Go to [Google Cloud Console](https://console.cloud.google.com)
-   - Enable Maps SDK for Android and iOS
-   - Create and restrict API key
-
-2. **Configure Android**
-   ```xml
-   <!-- android/app/src/main/AndroidManifest.xml -->
-   <meta-data
-       android:name="com.google.android.geo.API_KEY"
-       android:value="YOUR_API_KEY_HERE"/>
-   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-   ```
-
-3. **Configure iOS**
-   ```swift
-   // ios/Runner/AppDelegate.swift
-   import GoogleMaps
-   GMSServices.provideAPIKey("YOUR_API_KEY_HERE")
-   ```
-
-## 📱 Application Screens
-
-### **1. Dashboard Screen**
-- User information display
-- Feature navigation cards
-- Application statistics
-- Quick access to all modules
-
-### **2. Google Maps Screen**
-- Interactive map display
-- Location tracking controls
-- Map type selection
-- Event logging panel
-
-### **3. State Management Screen**
-- Counter demonstration
-- Like button interaction
-- Slider control
-- Dynamic background colors
-
-### **4. Cloud Functions Screen**
-- Function input interface
-- Real-time execution logging
-- Result display dialogs
-- Error handling feedback
-
-### **5. Real-time Sync Screen**
-- Message broadcasting
-- Live message feed
-- Sync event monitoring
-- Data persistence
-
-## 🔧 Technical Implementation
-
-### **Dependencies**
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.2
-  firebase_core: ^3.13.1
-  firebase_auth: ^5.5.4
-  cloud_firestore: ^5.6.8
-  firebase_storage: ^12.4.6
-  cloud_functions: ^5.5.0
-  google_maps_flutter: ^2.5.3
-  google_fonts: ^6.2.1
-  fl_chart: ^0.68.0
-  http: ^1.2.2
-  shared_preferences: ^2.3.2
-  qr_flutter: ^4.1.0
+```
+main()
+└─ App (MaterialApp)
+  └─ AuthGate (checks FirebaseAuth)
+    ├─ AuthScreens (Login/Signup)
+    └─ Home (BottomNavigation)
+      ├─ DashboardScreen
+      ├─ MapsScreen
+      ├─ ItemsScreen (CRUD)
+      └─ ProfileScreen
 ```
 
-### **Key Technologies**
-- **Flutter**: Cross-platform mobile development framework
-- **Firebase**: Backend services (Auth, Firestore, Functions, Storage)
-- **Google Maps**: Mapping and location services
-- **Material Design**: UI/UX design system
-- **Dart**: Programming language
+Folder structure (project root, trimmed)
 
-### **Code Structure**
 ```
-lib/
-├── main.dart                 # Application entry point
-├── screens/                 # Screen components
-│   ├── auth_screen.dart
-│   ├── dashboard_screen.dart
-│   ├── maps_screen.dart
-│   ├── state_management_screen.dart
-│   ├── cloud_functions_screen.dart
-│   └── realtime_sync_screen.dart
-├── services/                # Business logic
-├── widgets/                 # Reusable components
-└── utils/                   # Utility functions
+S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/
+├─ android/
+├─ ios/
+├─ lib/
+│  ├─ main.dart
+│  ├─ firebase_options.dart        # generated by FlutterFire CLI
+│  ├─ screens/
+│  ├─ services/
+│  ├─ widgets/
+│  └─ utils/
+├─ assets/
+├─ functions/
+└─ README.md
 ```
 
-## 🎯 Usage Instructions
+State management — Provider / Riverpod flow (concept)
 
-### **Authentication**
-1. Launch the application
-2. Enter email and password
-3. Click "Login" or "Sign Up"
-4. Navigate to dashboard after successful authentication
+- Repository layer (e.g., `UserRepository`) talks to Firestore
+- A `ChangeNotifier` / `StateNotifier` (Provider or Riverpod) holds app state and exposes methods (signIn, signOut, fetchData, listenToStreams)
+- UI widgets consume providers and subscribe to state changes
 
-### **Navigation**
-- Use bottom navigation bar to switch between screens
-- Tap feature cards on dashboard for quick access
-- Use app bar actions for screen-specific functions
-- Logout button returns to authentication screen
+Example flow: `AuthService` → `UserRepository` → `AuthNotifier` → UI (`Consumer`/`HookWidget`)
 
-### **Feature Testing**
-- **Maps**: Change map types, toggle location, view events
-- **State Management**: Increment counter, toggle like, adjust slider
-- **Cloud Functions**: Enter name, call function, view results
-- **Real-time Sync**: Send messages, view live feed, monitor events
+Firebase architecture (concept)
 
-## 🔍 Development Features
+- Authentication: managed via Firebase Auth
+- Firestore: collections for `users`, `items`, `transactions`, `notifications`
+- Cloud Functions: transactional or aggregated logic (e.g., awarding points)
+- FCM: push notifications from Cloud Functions or server
 
-### **State Management Examples**
-```dart
-setState(() {
-  _counter++;
-  _updateBackgroundColor();
-});
-```
+Suggested diagram assets (place in `assets/docs/diagrams/`):
 
-### **Firebase Integration**
-```dart
-await FirebaseAuth.instance.signInWithEmailAndPassword(
-  email: email,
-  password: password,
-);
-```
+- `assets/docs/diagrams/firebase-architecture.png` (Firebase + client + cloud functions)
+- `assets/docs/diagrams/data-model.png` (collections & relations)
 
-### **Cloud Functions**
-```dart
-final callable = FirebaseFunctions.instance.httpsCallable('sayHello');
-final result = await callable.call({'name': name});
-```
+Data model (example documents)
 
-### **Real-time Updates**
-```dart
-StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance.collection('messages').snapshots(),
-  builder: (context, snapshot) {
-    // Build UI based on real-time data
-  },
-)
-```
+- users/{uid}
 
-## 🐛 Troubleshooting
+  ```json
+  {
+    "uid": "uid_123",
+    "name": "Ramesh",
+    "email": "ramesh@example.com",
+    "points": 420,
+    "createdAt": "2024-02-26T12:00:00Z"
+  }
+  ```
 
-### **Common Issues**
+- items/{itemId}
 
-1. **Authentication Errors**
-   - Check Firebase project configuration
-   - Verify API key setup
-   - Ensure internet connectivity
+  ```json
+  {
+    "id": "item_1",
+    "title": "Oil pack",
+    "price": 199,
+    "points": 10,
+    "createdBy": "shop_1"
+  }
+  ```
 
-2. **Maps Not Loading**
-   - Verify Google Maps API key
-   - Check platform-specific configuration
-   - Ensure billing is enabled in Google Cloud Console
+- transactions/{txId}
+  ```json
+  {
+    "userId": "uid_123",
+    "itemId": "item_1",
+    "pointsDelta": 10,
+    "type": "earn", // earn | redeem
+    "timestamp": "2024-02-26T12:05:00Z"
+  }
+  ```
 
-3. **State Management Issues**
-   - Check setState() calls
-   - Verify widget rebuilds
-   - Debug with print statements
+---
 
-4. **Real-time Sync Problems**
-   - Check Firestore rules
-   - Verify collection names
-   - Monitor network connectivity
+## C. Setup & Installation
 
-### **Debugging Tips**
-- Use Flutter DevTools for debugging
-- Check console logs for errors
-- Test on real devices for production behavior
-- Monitor Firebase Console for backend issues
+Minimum requirements
 
-## 📈 Performance Optimization
+- Flutter SDK (see Flutter official site)
+- Android Studio / Xcode (for device/emulator & code signing)
+- A Firebase project and Google Cloud billing enabled (for Maps API)
 
-### **Best Practices**
-- Use const widgets where possible
-- Implement proper state management
-- Optimize image and asset loading
-- Use efficient data structures
-- Monitor memory usage
+Quick start
 
-### **Code Quality**
-- Follow Dart style guidelines
-- Use meaningful variable names
-- Implement proper error handling
-- Write comprehensive tests
-- Document complex logic
+1. Clone the repository
 
-## 🚀 Deployment
-
-### **Android Deployment**
 ```bash
-flutter build apk --release
-flutter build appbundle --release
+git clone <your-repo-url>
+cd S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana
 ```
 
-### **iOS Deployment**
+2. Get dependencies
+
+```bash
+flutter pub get
+```
+
+3. (Optional) Generate platform Firebase configs using FlutterFire CLI
+
+```bash
+dart pub global activate flutterfire_cli
+flutterfire configure --project <your-firebase-project-id>
+```
+
+Important Firebase steps (manual)
+
+1. Create a Firebase project in the Firebase Console
+2. Register Android and iOS apps
+
+- Android package name: check `android/app/src/main/AndroidManifest.xml` for `applicationId`
+- iOS bundle id: check `ios/Runner.xcodeproj`
+
+3. Download platform configuration files from Firebase Console
+
+- Android: `google-services.json` → put into [android/app](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/android/app)
+- iOS: `GoogleService-Info.plist` → put into [ios/Runner](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/ios/Runner)
+
+4. If you use the FlutterFire CLI, it will generate `lib/firebase_options.dart`. This project contains a `lib/firebase_options.dart` file — replace it or regenerate if needed. See [lib/firebase_options.dart](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/lib/firebase_options.dart).
+
+Maps API key configuration
+
+- Android: add your API key into `android/app/src/main/AndroidManifest.xml` inside `<application>`:
+
+```xml
+<meta-data
+   android:name="com.google.android.geo.API_KEY"
+   android:value="YOUR_API_KEY_HERE"/>
+```
+
+- iOS: register the API key during app startup (AppDelegate) or add `GMSApiKey` to `Info.plist`.
+
+Google Cloud notes: restrict the key to your Android package name and iOS bundle id and enable Maps SDK for Android/iOS.
+
+Generating a release build
+
+- Android (signed)
+
+```bash
+flutter build appbundle --release
+# or signed apk
+flutter build apk --release
+```
+
+See the project-specific signing guide: [RELEASE_BUILD_GUIDE.md](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/RELEASE_BUILD_GUIDE.md)
+
+- iOS (archive in Xcode)
+
 ```bash
 flutter build ios --release
+# then archive in Xcode for App Store upload
 ```
 
-### **Web Deployment**
-```bash
-flutter build web --release
+---
+
+## D. Feature Demonstration
+
+Place screenshots under `assets/images/` and commit them so this README renders images on GitHub. Prefer descriptive, lowercase filenames without spaces (e.g., `login.png`). If you already have screenshots with different names, you can reference them directly — examples below use the repo's `assets/images/` folder.
+
+Example filenames (recommended for grading/demo):
+
+- `assets/images/login.png` — Login / Signup
+- `assets/images/crud.png` — Firestore CRUD flows
+- `assets/images/push_foreground.png` — Push (foreground)
+- `assets/images/push_background.png` — Push (background)
+- `assets/images/push_terminated.png` — Push (terminated)
+- `assets/images/maps.png` — Maps screen
+- `assets/images/theming.png` — Theming toggle (light/dark)
+- `assets/images/error_empty_loader.png` — Error / Loader / Empty states
+
+Example markdown (will render when files are present). This repository already contains screenshots — reference them like:
+
+```md
+![Login screen](assets/images/login.jpeg)
+![Dashboard](assets/images/dashboard.jpeg)
+![Firestore / Auth users](assets/images/firebase_auth_users.jpeg)
+![Build output](assets/images/build_release_terminal.jpeg)
 ```
 
-## 🤝 Contributing
+Notes on push notifications
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+- Foreground: handled in-app via listeners (display local UI)
+- Background / Terminated: handled by FCM + notification taps routed to proper screen
+- Test with: Firebase Console (Cloud Messaging) or Cloud Functions triggered events
 
-## 📄 License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## E. Testing Summary (template)
 
-## 📞 Support
+Fill this section with real test data. Example headings below.
 
-For support and questions:
-- Create an issue in the GitHub repository
-- Check the troubleshooting section
-- Review the documentation
-- Contact the development team
+- Devices used:
+  - Pixel 4a (Android 12)
+  - Samsung M-series (Android 11)
+  - iPhone 12 (iOS 15) — if available
 
-## 🎉 Acknowledgments
+- Android versions tested:
+  - Android 11, 12
+
+- iOS versions tested:
+  - iOS 15
+
+- Issues found & fixes (sample entries):
+  - Map tiles not loading on Android 11 → fixed by adding Maps API key and enabling billing
+  - Notification payload missing click_action → fixed by including `click_action` and routing logic
+  - Crash on login due to null user profile → added defensive null checks and loading state
+
+---
+
+## F. Reflection (student prompts)
+
+Students should add short essays (2–4 paragraphs) here addressing:
+
+1. Biggest technical challenge you faced in Sprint #2
+2. The most important lesson learned (tooling, debugging, architecture)
+3. What you would improve given more time (testing, CI, UX polish)
+4. How Sprint #2 improved your confidence as a mobile engineer — be specific about technologies and patterns learned
+
+Example bullet prompts you can copy into your submission:
+
+- "Biggest challenge: ..."
+- "Key lesson: ..."
+- "If more time: ..."
+- "Confidence growth: ..."
+
+---
+
+## Appendix & Links
+
+- Project run instructions: [RUN_APP.md](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/RUN_APP.md)
+- Release guide: [RELEASE_BUILD_GUIDE.md](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/RELEASE_BUILD_GUIDE.md)
+- Firebase config (example): [lib/firebase_options.dart](S85-0226-LoyaltyLite-FlutterFirebase-SmartKirana/lib/firebase_options.dart)
+
+---
+
+-If you want, I can also:
+
+- add placeholder screenshot files to `assets/images/` for the demo
+- regenerate `lib/firebase_options.dart` using the FlutterFire CLI (requires your Firebase project id)
+
+If you want screenshots added now, tell me which screens to capture and I'll add placeholder PNGs.
 
 - Flutter team for the amazing framework
 - Firebase for backend services
@@ -607,6 +554,7 @@ void _submitForm() {
 ---
 
 ## 🚀 Getting Started
+
 ```bash
 lib/
 ├── main.dart                 # Application entry point
@@ -1278,6 +1226,5 @@ The project is ready for:
 ![WhatsApp Image 2026-04-04 at 10 29 35](https://github.com/user-attachments/assets/e030b6f0-43d2-45b5-a8c2-9e13c0530179)
 ![WhatsApp Image 2026-04-04 at 10 29 35 (1)](https://github.com/user-attachments/assets/2c71e0a3-8aee-4395-a504-f3de520de149)
 ![WhatsApp Image 2026-04-04 at 10 29 34](https://github.com/user-attachments/assets/52bbee7c-3724-4635-b8fd-9acdb92c72dc)
-
 
 For updates and detailed information, refer to the comprehensive documentation files in this project.
