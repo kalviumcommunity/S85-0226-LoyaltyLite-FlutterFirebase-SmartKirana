@@ -240,11 +240,13 @@ Example filenames (recommended for grading/demo):
 - `assets/images/theming.png` — Theming toggle (light/dark)
 - `assets/images/error_empty_loader.png` — Error / Loader / Empty states
 
-Example markdown (will render when files are present). This repository already contains WhatsApp-exported screenshots — you can reference them directly, for example:
+Example markdown (will render when files are present). This repository already contains screenshots — reference them like:
 
 ```md
 ![Login screen](assets/images/login.jpeg)
-![CRUD example](assets/images/WhatsApp Image.jpeg)
+![Dashboard](assets/images/dashboard.jpeg)
+![Firestore / Auth users](assets/images/firebase_auth_users.jpeg)
+![Build output](assets/images/build_release_terminal.jpeg)
 ```
 
 Notes on push notifications
